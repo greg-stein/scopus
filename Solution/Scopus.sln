@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserEngine", "..\ParserEngine\ParserEngine.csproj", "{93892691-AB88-4FE8-9F33-ED5BC8FEFAD5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scopus", "..\Scopus\Scopus.csproj", "{93892691-AB88-4FE8-9F33-ED5BC8FEFAD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParserEngineUnitTests", "..\ParserEngineUnitTests\ParserEngineUnitTests.csproj", "{4019D109-913D-43E9-A7FE-AD90DBADE664}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScopusUnitTests", "..\ScopusUnitTests\ScopusUnitTests.csproj", "{4019D109-913D-43E9-A7FE-AD90DBADE664}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
