@@ -1,16 +1,15 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ParsLibTests")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("ScopusUnitTests")]
+[assembly: AssemblyDescription("Unit tests for Scopus framework")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Camtek")]
-[assembly: AssemblyProduct("ParsLibTests")]
-[assembly: AssemblyCopyright("Copyright © Camtek 2009")]
+[assembly: AssemblyCompany("Scopus")]
+[assembly: AssemblyProduct("Scopus")]
+[assembly: AssemblyCopyright("Copyleft © Scopus 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

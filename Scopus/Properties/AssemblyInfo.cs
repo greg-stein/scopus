@@ -5,15 +5,15 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ParsLib")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Scopus")]
+[assembly: AssemblyDescription("Parser Generator")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Camtek")]
-[assembly: AssemblyProduct("ACE")]
-[assembly: AssemblyCopyright("Copyright © Camtek 2009")]
+[assembly: AssemblyCompany("Scopus")]
+[assembly: AssemblyProduct("Scopus")]
+[assembly: AssemblyCopyright("Copyleft © Scopus 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: log4net.Config.XmlConfigurator(ConfigFile = @"C:\VSCAN90-2008\Sources\DPF\ParsLib\log4net.config", Watch = true)]
+[assembly: log4net.Config.XmlConfigurator(ConfigFile = @"log4net.config", Watch = true)]
 [assembly: InternalsVisibleTo("ScopusUnitTests")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -34,5 +34,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("0.3.*")]
+[assembly: AssemblyFileVersion("0.3.*")]
