@@ -1,22 +1,12 @@
-﻿using System.Collections.Generic;
-
-namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegExp
 {
     internal class RepetitionRegExp : RegExp
     {
         internal RegExp ExpressionToRepeat { get; set; }
-        internal bool AtLeastOneOccurrence { get; set; }
 
         internal RepetitionRegExp(RegExp expression)
         {
             ExpressionToRepeat = expression;
-            AtLeastOneOccurrence = false;
-        }
-
-        internal RepetitionRegExp(RegExp expression, bool atLeastOneOccurrence)
-        {
-            ExpressionToRepeat = expression;
-            AtLeastOneOccurrence = atLeastOneOccurrence;
         }
 
         protected override RegExp[] SubExpressions
@@ -24,27 +14,17 @@ namespace Scopus.LexicalAnalysis.RegExp
             get { return new[] {ExpressionToRepeat}; }
         }
 
-        internal override bool CalculateNullable()
+        internal override NondeterministicFiniteAutomata AsNFA()
         {
-            // This is less readable, but do the same: 
-            // return !AtLeastOneOccurrence || ExpressionToRepeat.Nullable;
+            var nfa = new NondeterministicFiniteAutomata("RepetitionRegExpNFA");
+            var innerExpNFA = ExpressionToRepeat.AsNFA();
 
-            if (AtLeastOneOccurrence)
-            {
-                return ExpressionToRepeat.Nullable;
-            }
+            nfa.StartState.AddTransitionTo(innerExpNFA.StartState, InputChar.Epsilon());
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
+            innerExpNFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
+            innerExpNFA.Terminator.AddTransitionTo(innerExpNFA.StartState, InputChar.Epsilon());
 
-            return true;
-        }
-
-        internal override HashSet<int> CalculateFirstPos()
-        {
-            return ExpressionToRepeat.FirstPos;
-        }
-
-        internal override HashSet<int> CalculateLastPos()
-        {
-            return ExpressionToRepeat.LastPos;
+            return nfa;
         }
     }
 }

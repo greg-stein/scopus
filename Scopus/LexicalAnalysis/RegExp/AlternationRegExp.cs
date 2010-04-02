@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Scopus.LexicalAnalysis.RegExp
 {
@@ -38,25 +37,17 @@ namespace Scopus.LexicalAnalysis.RegExp
             get { return new[] {Alternative1, Alternative2}; }
         }
 
-        internal override bool CalculateNullable()
+        internal override NondeterministicFiniteAutomata AsNFA()
         {
-            return (Alternative1.Nullable || Alternative2.Nullable);
-        }
+            var nfa = new NondeterministicFiniteAutomata("AlternationRegExpNFA");
+            var alternative1NFA = Alternative1.AsNFA();
+            var alternative2NFA = Alternative2.AsNFA();
+            nfa.StartState.AddTransitionTo(alternative1NFA.StartState, InputChar.Epsilon());
+            nfa.StartState.AddTransitionTo(alternative2NFA.StartState, InputChar.Epsilon());
+            alternative1NFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
+            alternative2NFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
 
-        internal override HashSet<int> CalculateFirstPos()
-        {
-            var firstPos = new HashSet<int>(Alternative1.FirstPos);
-            firstPos.UnionWith(Alternative2.FirstPos);
-
-            return firstPos;
-        }
-
-        internal override HashSet<int> CalculateLastPos()
-        {
-            var lastPos = new HashSet<int>(Alternative1.LastPos);
-            lastPos.UnionWith(Alternative2.LastPos);
-
-            return lastPos;
+            return nfa;
         }
     }
 }

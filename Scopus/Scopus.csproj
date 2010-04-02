@@ -66,6 +66,7 @@
     <Compile Include="Exceptions\SyntaxErrorException.cs" />
     <Compile Include="Exceptions\UnexpectedTokenException.cs" />
     <Compile Include="LexicalAnalysis\ILexer.cs" />
+    <Compile Include="LexicalAnalysis\InputChar.cs" />
     <Compile Include="LexicalAnalysis\ITokenizer.cs" />
     <Compile Include="LexicalAnalysis\KeyWordsTokenizer.cs" />
     <Compile Include="LexicalAnalysis\Lexer.cs" />
@@ -73,10 +74,13 @@
     <Compile Include="LexicalAnalysis\RegExp\AlternationRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegExp\IRegExpVisitor.cs" />
     <Compile Include="LexicalAnalysis\RegExp\LiteralRegExp.cs" />
+    <Compile Include="LexicalAnalysis\NondeterministicFiniteAutomata.cs" />
     <Compile Include="LexicalAnalysis\RegExp\OptionalRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegExp\RegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegExp\RepetitionAtLeastOneRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegExp\RepetitionRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegExp\SequenceRegExp.cs" />
+    <Compile Include="LexicalAnalysis\State.cs" />
     <Compile Include="LexicalAnalysis\Token.cs" />
     <Compile Include="LexicalAnalysis\TokensCollection.cs" />
     <Compile Include="LexicalAnalysis\TokensEnumerator.cs" />

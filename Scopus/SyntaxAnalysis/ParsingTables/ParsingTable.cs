@@ -163,7 +163,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
 		internal void BuildFollowSets()
 		{
 			Follow = new Dictionary<int, List<Terminal>>(mG.NonTerminals.Count+1);
-			Follow.Add(mG.InitialProduction.Symbol.ID, new List<Terminal>(1) { mG.UsedTerminals[Lexer.END_MARKER_TOKEN_ID] });
+			Follow.Add(mG.InitialProduction.Symbol.ID, new List<Terminal>(1) { mG.UsedTerminals[Terminal.END_MARKER_TOKEN_ID] });
 			foreach (var nTerm in mG.NonTerminals)
 				Follow.Add(nTerm.ID, new List<Terminal>());
 
@@ -253,9 +253,9 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
 						}
 						else
 						{
-							if (ActionTable[stateID, Lexer.END_MARKER_TOKEN_ID].Action != ParserAction.Error)
+							if (ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action != ParserAction.Error)
 								throw new ParserException("Provided grammar is not compliant with SLR(1) parser.");
-							ActionTable[stateID, Lexer.END_MARKER_TOKEN_ID].Action = ParserAction.Accept;
+							ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action = ParserAction.Accept;
 						}
 					}
 				}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Scopus.SyntaxAnalysis;
 
 namespace Scopus.LexicalAnalysis
 {
@@ -89,7 +90,7 @@ namespace Scopus.LexicalAnalysis
 				}
 
 				mReachedEndMarker = true;
-				mCurrent = new Token(Lexer.END_MARKER_TOKEN_NAME) { Class = Lexer.END_MARKER_TOKEN_ID };
+				mCurrent = new Token(Terminal.END_MARKER_TOKEN_NAME) { Class = Terminal.END_MARKER_TOKEN_ID };
 
 				return true;
 			}

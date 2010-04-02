@@ -8,5 +8,8 @@ namespace Scopus.SyntaxAnalysis
         {
             TokenClassID = classID;
         }
+
+        internal const int END_MARKER_TOKEN_ID = 0;					// class ID for fully synthetic token of END_MARK
+        internal const string END_MARKER_TOKEN_NAME = "<end>";		// name for fully synthetic token of END_MARK (used only in representation)
     }
 }

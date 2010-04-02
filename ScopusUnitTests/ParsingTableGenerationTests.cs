@@ -31,7 +31,7 @@ namespace ScopusUnitTests
 
             tokenizer = new RegExpTokenizer();
 
-            id = tokenizer.IntegerNumber;
+            id = tokenizer.AddToken("[0-9]+");
             plus = tokenizer.AddToken("+");
             mult = tokenizer.AddToken("*");
             leftBrace = tokenizer.AddToken("(");
@@ -140,11 +140,11 @@ namespace ScopusUnitTests
 			var pt = new ParsingTable(grammar);
 
 			Assert.That(pt.Follow.Count, Is.EqualTo(4));
-			var followE = new List<Terminal> { grammar.UsedTerminals[Lexer.END_MARKER_TOKEN_ID], plus, rightBrace };
+			var followE = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, rightBrace };
 			Assert.That(pt.Follow[E.ID], Is.EqualTo(followE));
-			var followT = new List<Terminal> { grammar.UsedTerminals[Lexer.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
+			var followT = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
 			Assert.That(pt.Follow[T.ID], Is.EqualTo(followT));
-			var followF = new List<Terminal> { grammar.UsedTerminals[Lexer.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
+			var followF = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
 			Assert.That(pt.Follow[F.ID], Is.EqualTo(followF));
 		}
 

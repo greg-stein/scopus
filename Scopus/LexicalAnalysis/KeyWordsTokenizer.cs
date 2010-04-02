@@ -44,6 +44,7 @@ namespace Scopus.LexicalAnalysis
         protected IDProvider StateIdProvider = new IDProvider();
         protected IDProvider ClassIdProvider = new IDProvider();
 
+        /*
 		protected Terminal IntegerNumberValue;
 		public Terminal IntegerNumber
     	{
@@ -81,7 +82,7 @@ namespace Scopus.LexicalAnalysis
 		//        return FloatNumberStateValue;
 		//    }
 		//}
-		
+		*/
 		protected Terminal EndlineValue;
 		public Terminal Endline
 		{
@@ -92,15 +93,8 @@ namespace Scopus.LexicalAnalysis
 			}
 		}
 		protected int EndlineStateValue;
-		//public int EndlineState
-		//{
-		//    get
-		//    {
-		//        InitEndlineToken();
-		//        return EndlineStateValue;
-		//    }
-		//}
 
+        /*
 		protected Terminal StringIdentifierValue;
 		public Terminal StringIdentifier
 		{
@@ -120,7 +114,8 @@ namespace Scopus.LexicalAnalysis
 		//    }
 		//}
 		
-		
+		*/
+
 		public int[] TokensIndices { get; set; }
 		public int[] TokensClasses { get; set; }
 		public HashSet<int> HiddenTokens { get; set; }
@@ -146,6 +141,7 @@ namespace Scopus.LexicalAnalysis
 		{
 			return new Terminal(tokenString, AddToken(tokenString, -1).Value);
 		}
+
 		private KeyValuePair<int, int> AddToken(string tokenString, int desiredClass)
 		{
 			if (String.IsNullOrEmpty(tokenString)) throw new ArgumentNullException("tokenString");
@@ -158,6 +154,7 @@ namespace Scopus.LexicalAnalysis
 
 			return new KeyValuePair<int, int>(state, tokenClass);
 		}
+
 		private int IntegrateToken(byte[] tokenBytes)
 		{
 			var oldBranchCurState = INITIAL_STATE;
@@ -199,6 +196,7 @@ namespace Scopus.LexicalAnalysis
 			return new Terminal(tokenStrings[0], tokenClass);
 		}
 
+        /*
 		public void AddCommentWithBordersToken(string startToken, string endToken)
 		{
 			if (String.IsNullOrEmpty(startToken)) throw new ArgumentNullException("startToken");
@@ -275,7 +273,8 @@ namespace Scopus.LexicalAnalysis
 
 			return curIntermediateState;
 		}
-		
+		*/
+
 		/// <summary>
 		/// Hides token, preventing tokenizer to supply it to parser.
 		/// </summary>
@@ -284,7 +283,7 @@ namespace Scopus.LexicalAnalysis
 		{
 			HiddenTokens.Add(term.TokenClassID);
 		}
-		
+/*		
 		protected virtual void InitIntegerNumberToken()
 		{
 			if (IntegerNumberValue == null)
@@ -317,6 +316,7 @@ namespace Scopus.LexicalAnalysis
 				FloatNumberValue = new Terminal(Lexer.FLOAT_NUMBER_TOKEN_NAME, IntegerNumber.TokenClassID);
 			}
 		}
+ * */
 		protected virtual void InitEndlineToken()
 		{
 			if (EndlineValue == null)
@@ -332,6 +332,7 @@ namespace Scopus.LexicalAnalysis
 				EndlineValue = new Terminal(Lexer.END_LINE_TOKEN_NAME, ClassIdProvider.GetCurrent());
 			}
 		}
+        /*
 		protected virtual void InitStringIdentifierToken()
 		{
 			if (StringIdentifierValue == null)
@@ -359,6 +360,7 @@ namespace Scopus.LexicalAnalysis
 				StringIdentifierValue = new Terminal(Lexer.STRING_IDENTIFIER_TOKEN_NAME, ClassIdProvider.GetCurrent());
 			}
 		}
+        */
 
 		public int Tokenize(byte[] buffer, int offset, int length)
         {

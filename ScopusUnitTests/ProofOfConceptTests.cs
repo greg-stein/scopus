@@ -12,14 +12,6 @@ namespace ScopusUnitTests
     [TestFixture]
     public class ProofOfConceptTests
     {
-		//const string INPUT = @"2*(3+4)$";
-		//private ActionTableEntry[,] actionTable;
-		//private int[,] gotoTable;
-		//private string fileName;
-		//private ILexer lexer;
-		//private Stream fileStream;
-		//private RegExpTokenizer tokenizer;
-
         [SetUp]
         public void InitTests()
         {
@@ -197,7 +189,7 @@ namespace ScopusUnitTests
 			//actionTable[11, 5].Destination = 5;
 
 			#endregion
-
+            
 			gotoTable = new int[12, 3];
 			#region Populating Goto Table
 
@@ -221,12 +213,11 @@ namespace ScopusUnitTests
             var T = new NonTerminal("T");
             var F = new NonTerminal("F");
 
-            var id = tokenizer.IntegerNumber;
+            var id = tokenizer.AddToken("[0-9]+");
             var plus = tokenizer.AddToken("+");
             var mult = tokenizer.AddToken("*");
             var leftBrace = tokenizer.AddToken("(");
             var rightBrace = tokenizer.AddToken(")");
-            //var endMark = tokenizer.AddToken("$");
 
 			var grammar = new AugmentedGrammar(tokenizer.TotalTokensCount)
                               {
@@ -263,7 +254,7 @@ namespace ScopusUnitTests
 			var R = new NonTerminal("R");
 
 			var tokenizer = new RegExpTokenizer();
-			var id = tokenizer.IntegerNumber;
+            var id = tokenizer.AddToken("[0-9]+");
 			var assign = tokenizer.AddToken("=");
 			var deref = tokenizer.AddToken("*");
 
@@ -299,7 +290,7 @@ namespace ScopusUnitTests
 			var T = new NonTerminal("T");
 			var F = new NonTerminal("F");
 
-			var id = tokenizer.IntegerNumber;
+			var id = tokenizer.AddToken("[0-9]+");
 			var plus = tokenizer.AddToken("+");
 			var mult = tokenizer.AddToken("*");
 			var leftBrace = tokenizer.AddToken("(");

@@ -5,9 +5,7 @@ namespace Scopus.LexicalAnalysis
 {
     public class Lexer : ILexer, IDisposable
     {
-		public const int END_MARKER_TOKEN_ID = 0;					// class ID for fully synthetic token of END_MARK
-		public const string END_MARKER_TOKEN_NAME = "<end>";		// name for fully synthetic token of END_MARK (used only in representation)
-		public const string END_LINE_TOKEN_NAME = "<endln>";
+        public const string END_LINE_TOKEN_NAME = "<endln>";
 		public const string INTEGER_NUMBER_TOKEN_NAME = "int_id";
 		public const string FLOAT_NUMBER_TOKEN_NAME = "float_id";
 		public const string STRING_CONSTANT_TOKEN_NAME = "string_const";

@@ -3,6 +3,7 @@ using System.IO;
 using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
+using Scopus.SyntaxAnalysis;
 
 namespace ScopusUnitTests
 {
@@ -12,7 +13,7 @@ namespace ScopusUnitTests
         // Indices:                     01234567890123456
         private const string SOURCE = @"lexem123ley,6.7&#";
 
-		private readonly string[] lexemes = new[] { "lexem", "123", "ley", ",", "6", ".", "7", "&", "#", Lexer.END_MARKER_TOKEN_NAME };
+		private readonly string[] lexemes = new[] { "lexem", "123", "ley", ",", "6", ".", "7", "&", "#", Terminal.END_MARKER_TOKEN_NAME };
         private string fileName;
         private Lexer lexer;
         private Stream fileStream;

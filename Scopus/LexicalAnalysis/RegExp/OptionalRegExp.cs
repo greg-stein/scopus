@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegExp
 {
     internal class OptionalRegExp : RegExp
     {
@@ -17,19 +14,15 @@ namespace Scopus.LexicalAnalysis.RegExp
             get { return new[] {OptionalExpression};}
         }
 
-        internal override bool CalculateNullable()
+        internal override NondeterministicFiniteAutomata AsNFA()
         {
-            return true;
-        }
+            var nfa = new NondeterministicFiniteAutomata("OptionalRegExpNFA");
+            var optionalExpNFA = OptionalExpression.AsNFA();
+            nfa.StartState.AddTransitionTo(optionalExpNFA.StartState, InputChar.Epsilon());
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
+            optionalExpNFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
 
-        internal override HashSet<int> CalculateFirstPos()
-        {
-            return OptionalExpression.FirstPos;
-        }
-
-        internal override HashSet<int> CalculateLastPos()
-        {
-            return OptionalExpression.LastPos;
+            return nfa;
         }
     }
 }

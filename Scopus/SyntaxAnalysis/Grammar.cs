@@ -21,7 +21,7 @@ namespace Scopus.SyntaxAnalysis
             UsedTerminals = new List<Terminal>();
             GrammarSymbols = new List<GrammarEntity>();
 
-			Terminal endMark = new Terminal(Lexer.END_MARKER_TOKEN_NAME, Lexer.END_MARKER_TOKEN_ID);
+			Terminal endMark = new Terminal(Terminal.END_MARKER_TOKEN_NAME, Terminal.END_MARKER_TOKEN_ID);
 			UsedTerminals.Add(endMark);
 			GrammarSymbols.Add(endMark);
         }

@@ -30,12 +30,10 @@ namespace ScopusUnitTests
             var mult = tokenizer.AddToken("*");
             var leftBrace = tokenizer.AddToken("(");
             var rightBrace = tokenizer.AddToken(")");
-            var id = tokenizer.IntegerNumber;
 
-            var prod = E --> T & mult & leftBrace & id & plus & id & rightBrace;
+            var prod = E --> T & mult & leftBrace &  plus & rightBrace;
 
-			Assert.That(prod.ToString(), Is.EqualTo("E --> T * ( " + Lexer.INTEGER_NUMBER_TOKEN_NAME + " + " +
-																	 Lexer.INTEGER_NUMBER_TOKEN_NAME + " )"));
+			Assert.That(prod.ToString(), Is.EqualTo("E --> T * ( " + " + " + " )"));
             Console.WriteLine(prod);
         }
 
@@ -94,7 +92,6 @@ namespace ScopusUnitTests
             var T = new NonTerminal("T");
             var F = new NonTerminal("F");
 
-            var id = tokenizer.IntegerNumber;
             var plus = tokenizer.AddToken("+");
             var mult = tokenizer.AddToken("*");
             var leftBrace = tokenizer.AddToken("(");
@@ -108,7 +105,6 @@ namespace ScopusUnitTests
             var prod3 = T --> T & mult & F ^ (v => kuj = 3);
             var prod4 = T --> F;
             var prod5 = F --> leftBrace & E & rightBrace;
-			var prod6 = F --> id ^ (v => kuj = 4);
 
             Assert.That(kuj, Is.EqualTo(0));
             prod1.PerformSemanticAction(null);
@@ -121,8 +117,6 @@ namespace ScopusUnitTests
             Assert.That(kuj, Is.EqualTo(3));
             prod5.PerformSemanticAction(null);
             Assert.That(kuj, Is.EqualTo(3));
-            prod6.PerformSemanticAction(null);
-            Assert.That(kuj, Is.EqualTo(4));
         }
 
         [Test]

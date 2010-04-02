@@ -1,49 +1,25 @@
-﻿using System.Collections.Generic;
-using Scopus.Auxiliary;
-
-namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegExp
 {
     internal class LiteralRegExp : RegExp
     {
-        // Is common for all literal expressions (leaves)
-        private static IDProvider positionProvider = new IDProvider();
+        internal char Literal { get; private set; }
 
-        internal char Terminal { get; private set; }
-        internal int Position { get; private set; }
-
-        static LiteralRegExp()
+        internal LiteralRegExp(char literal)
         {
-            positionProvider.GetNext(); // start assigning positions from 1
-        }
-
-        internal LiteralRegExp(char terminal)
-        {
-            Terminal = terminal;
-            Position = positionProvider.GetNext();
+            Literal = literal;
         }
 
         protected override RegExp[] SubExpressions
         {
-            get { return new RegExp[0];}
+            get { return new RegExp[0]; } // return empty array
         }
 
-        internal override bool CalculateNullable()
+        internal override NondeterministicFiniteAutomata AsNFA()
         {
-            return false;
-        }
+            var nfa = new NondeterministicFiniteAutomata("LiteralRegExpNFA");
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.For(Literal));
 
-        internal override HashSet<int> CalculateFirstPos()
-        {
-            var firstPos = new HashSet<int> {this.Position};
-
-            return firstPos;
-        }
-
-        internal override HashSet<int> CalculateLastPos()
-        {
-            var lastPos = new HashSet<int> { this.Position };
-
-            return lastPos;
+            return nfa;
         }
     }
 }
