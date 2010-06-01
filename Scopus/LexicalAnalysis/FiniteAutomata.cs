@@ -1,12 +1,12 @@
 ﻿namespace Scopus.LexicalAnalysis
 {
-    internal class NondeterministicFiniteAutomata
+    internal class FiniteAutomata
     {
         private string name = "Default";
         internal State StartState { get; set; }
         internal State Terminator { get; set; }
 
-        internal NondeterministicFiniteAutomata(string name, bool createMarginalStates)
+        internal FiniteAutomata(string name, bool createMarginalStates)
         {
             if (createMarginalStates)
             {
@@ -17,11 +17,11 @@
             this.name = name;
         }
 
-        internal NondeterministicFiniteAutomata()
+        internal FiniteAutomata()
             : this("Default", true)
         {}
 
-        internal NondeterministicFiniteAutomata(string name)
+        internal FiniteAutomata(string name)
             :this(name, true)
         {}
     }

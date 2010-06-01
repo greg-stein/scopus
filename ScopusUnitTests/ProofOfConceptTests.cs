@@ -31,12 +31,12 @@ namespace ScopusUnitTests
 			string fileName;
 			ILexer lexer;
 			Stream fileStream;
-			RegExpTokenizer tokenizer;
+            KeywordsTokenizer tokenizer;
 
 
 			fileName = Path.GetTempFileName();
 			File.WriteAllText(fileName, INPUT);
-			tokenizer = new RegExpTokenizer();
+            tokenizer = new KeywordsTokenizer();
 			lexer = new Lexer(tokenizer);
 			fileStream = File.OpenRead(fileName);
 			lexer.SetDataSource(fileStream);
@@ -253,7 +253,7 @@ namespace ScopusUnitTests
 			var L = new NonTerminal("L");
 			var R = new NonTerminal("R");
 
-			var tokenizer = new RegExpTokenizer();
+            var tokenizer = new KeywordsTokenizer();
             var id = tokenizer.AddToken("[0-9]+");
 			var assign = tokenizer.AddToken("=");
 			var deref = tokenizer.AddToken("*");
@@ -277,7 +277,7 @@ namespace ScopusUnitTests
 
 			string fileName = Path.GetTempFileName();
 			File.WriteAllText(fileName, INPUT);
-			RegExpTokenizer tokenizer = new RegExpTokenizer();
+            KeywordsTokenizer tokenizer = new KeywordsTokenizer();
 			ILexer lexer = new Lexer(tokenizer);
 			Stream fileStream = File.OpenRead(fileName);
 			lexer.SetDataSource(fileStream);

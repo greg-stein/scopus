@@ -4,14 +4,17 @@ namespace Scopus.LexicalAnalysis
 {
     internal class State
     {
-        internal readonly Dictionary<InputChar, List<State>> Transition = 
+        internal readonly Dictionary<InputChar, List<State>> Transitions = 
             new Dictionary<InputChar, List<State>>();
 
         internal string Name { get; private set;}
+        internal bool IsAccepting { get; set; }
+        internal int TokenClass { get; set; }
 
         internal State(string name)
         {
             Name = name;
+            IsAccepting = false;
         }
 
         /// <summary>
@@ -23,13 +26,13 @@ namespace Scopus.LexicalAnalysis
         {
             List<State> states;
 
-            if (Transition.TryGetValue(iChar, out states))
+            if (Transitions.TryGetValue(iChar, out states))
             {
                 states.Add(state);
             }
             else
             {
-                Transition[iChar] = new List<State>() {state};
+                Transitions[iChar] = new List<State>() {state};
             }
         }
 

@@ -1,4 +1,4 @@
-﻿namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     public abstract class RegExp
     {
@@ -33,6 +33,13 @@
         }
 
         protected abstract RegExp[] SubExpressions { get; }
-        internal abstract NondeterministicFiniteAutomata AsNFA();
+        internal abstract FiniteAutomata AsNFA();
+
+        internal FiniteAutomata AsNFA(bool markTerminatorAsAcceptingState)
+        {
+            var nfa = AsNFA();
+            nfa.Terminator.IsAccepting = markTerminatorAsAcceptingState;
+            return nfa;
+        }
     }
 }

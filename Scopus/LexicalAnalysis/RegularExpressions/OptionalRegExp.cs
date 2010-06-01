@@ -1,4 +1,4 @@
-﻿namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     internal class OptionalRegExp : RegExp
     {
@@ -14,15 +14,20 @@
             get { return new[] {OptionalExpression};}
         }
 
-        internal override NondeterministicFiniteAutomata AsNFA()
+        internal override FiniteAutomata AsNFA()
         {
-            var nfa = new NondeterministicFiniteAutomata("OptionalRegExpNFA");
+            var nfa = new FiniteAutomata("OptionalRegExpNFA");
             var optionalExpNFA = OptionalExpression.AsNFA();
             nfa.StartState.AddTransitionTo(optionalExpNFA.StartState, InputChar.Epsilon());
             nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
             optionalExpNFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
 
             return nfa;
+        }
+
+        public override string ToString()
+        {
+            return "(" + OptionalExpression + ")?";
         }
     }
 }

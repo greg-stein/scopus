@@ -22,7 +22,7 @@ namespace ScopusUnitTests
         [Test]
         public void GrammarEntitySequenceWithTokensTest()
         {
-            var tokenizer = new RegExpTokenizer();
+            var tokenizer = new KeywordsTokenizer();
 
             NonTerminal E = new NonTerminal("E"), T = new NonTerminal("T"), F = new NonTerminal("F");
 
@@ -86,7 +86,7 @@ namespace ScopusUnitTests
         [Test]
         public void ProductionWithSemanticActionComplicatedTest()
         {
-            var tokenizer = new RegExpTokenizer();
+            var tokenizer = new KeywordsTokenizer();
 
             var E = new NonTerminal("E");
             var T = new NonTerminal("T");

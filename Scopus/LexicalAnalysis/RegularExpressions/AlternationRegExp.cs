@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Scopus.LexicalAnalysis.RegExp
+namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     internal class AlternationRegExp : RegExp
     {
@@ -37,9 +37,9 @@ namespace Scopus.LexicalAnalysis.RegExp
             get { return new[] {Alternative1, Alternative2}; }
         }
 
-        internal override NondeterministicFiniteAutomata AsNFA()
+        internal override FiniteAutomata AsNFA()
         {
-            var nfa = new NondeterministicFiniteAutomata("AlternationRegExpNFA");
+            var nfa = new FiniteAutomata("AlternationRegExpNFA");
             var alternative1NFA = Alternative1.AsNFA();
             var alternative2NFA = Alternative2.AsNFA();
             nfa.StartState.AddTransitionTo(alternative1NFA.StartState, InputChar.Epsilon());
@@ -48,6 +48,11 @@ namespace Scopus.LexicalAnalysis.RegExp
             alternative2NFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
 
             return nfa;
+        }
+
+        public override string ToString()
+        {
+            return "(" + Alternative1 + " | " + Alternative2 + ")";
         }
     }
 }

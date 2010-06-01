@@ -20,7 +20,7 @@ namespace ScopusUnitTests
         private Terminal rightBrace;
         private Terminal endMark;
 
-        private RegExpTokenizer tokenizer;
+        private KeywordsTokenizer tokenizer;
         private AugmentedGrammar grammar;
 
         public ParsingTableGenerationTests()
@@ -29,7 +29,7 @@ namespace ScopusUnitTests
             T = new NonTerminal("T");
             F = new NonTerminal("F");
 
-            tokenizer = new RegExpTokenizer();
+            tokenizer = new KeywordsTokenizer();
 
             id = tokenizer.AddToken("[0-9]+");
             plus = tokenizer.AddToken("+");

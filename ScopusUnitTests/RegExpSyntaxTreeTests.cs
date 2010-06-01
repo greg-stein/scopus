@@ -1,13 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
-using Scopus.LexicalAnalysis.RegExp;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 
 namespace ScopusUnitTests
 {
     [TestFixture]
     public class RegExpNFAConstructionTests
     {
+        [Test]
+        public void NfaToDfaConversionSimpleTest()
+        {
+            RegExp re = RegExp.Literal('a');
+            var dfa = NFAToDFAConverter.Convert(re.AsNFA(true));
+
+            Assert.True(Simulate(0, dfa.StartState, 'a').IsAccepting);
+        }
+
+        [Test]
+        public void NfaToDfaConversionTest()
+        {
+            // (a|b)*ca
+            RegExp re = RegExp.Sequence(RegExp.AnyNumberOf(RegExp.Choice(RegExp.Literal('a'), RegExp.Literal('b'))), RegExp.Literal('c'),
+                RegExp.Literal('a'));
+            var dfa = NFAToDFAConverter.Convert(re.AsNFA(true));
+
+            var str = new char?[] {'a', 'b', 'c', 'a'};
+
+            Assert.True(Simulate(0, dfa.StartState, str).IsAccepting);
+        }
+
+
         [Test]
         public void LiteralRegExpNFAConstructionTest()
         {
@@ -17,7 +42,7 @@ namespace ScopusUnitTests
 
             var nfa = regExp.AsNFA();
 
-            Assert.That(nfa.StartState.Transition[InputChar.For(LITERAL)], Is.EquivalentTo(new List<State> {nfa.Terminator}));
+            Assert.That(nfa.StartState.Transitions[InputChar.For(LITERAL)], Is.EquivalentTo(new List<State> {nfa.Terminator}));
         }
 
         [Test]
@@ -26,7 +51,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Sequence(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(TransitPath(nfa.StartState, 'a', null, 'b'), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, 'a', null, 'b'), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -35,8 +60,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.Choice(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(TransitPath(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
-            Assert.That(TransitPath(1, nfa.StartState, null, 'b', null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, nfa.StartState, null, 'b', null), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -45,8 +70,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.Optional(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(TransitPath(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
-            Assert.That(TransitPath(1, nfa.StartState, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, nfa.StartState, null), Is.EqualTo(nfa.Terminator));
         }
 
         [Test]
@@ -55,9 +80,9 @@ namespace ScopusUnitTests
             var regExp = RegExp.AnyNumberOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(TransitPath(nfa.StartState, null, 'a', null),  Is.EqualTo(nfa.Terminator));
-            Assert.That(TransitPath(1, nfa.StartState, new char?[] { null }), Is.EqualTo(nfa.Terminator));
-            Assert.That(TransitPath(1, TransitPath(nfa.StartState, null, 'a'), null),Is.EqualTo(TransitPath(nfa.StartState, null)));
+            Assert.That(Simulate(nfa.StartState, null, 'a', null),  Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, nfa.StartState, new char?[] { null }), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, Simulate(nfa.StartState, null, 'a'), null),Is.EqualTo(Simulate(nfa.StartState, null)));
         }
 
         [Test]
@@ -66,12 +91,12 @@ namespace ScopusUnitTests
             var regExp = RegExp.AtLeastOneOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
             
-            Assert.That(TransitPath(nfa.StartState, null, 'a', null, 'a', null), Is.EqualTo(TransitPath(nfa.StartState, null, 'a', null)));
-            Assert.That(TransitPath(nfa.StartState, null, 'a', null, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(TransitPath(1, TransitPath(nfa.StartState, null, 'a', null, 'a'), null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, null, 'a', null, 'a', null), Is.EqualTo(Simulate(nfa.StartState, null, 'a', null)));
+            Assert.That(Simulate(nfa.StartState, null, 'a', null, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, Simulate(nfa.StartState, null, 'a', null, 'a'), null), Is.EqualTo(nfa.Terminator));
         }
 
-        private static State TransitPath(int transitionToUse, State s, params char?[] inputChars)
+        private static State Simulate(int transitionToUse, State s, params char?[] inputChars)
         {
             if (inputChars == null)
                 inputChars = new char?[] {null};
@@ -80,22 +105,30 @@ namespace ScopusUnitTests
             foreach (var inputChar in inputChars)
             {
                 var ic = inputChar == null ? InputChar.Epsilon() : InputChar.For((char)inputChar);
-                if (currentState.Transition[ic].Count > transitionToUse)
+                List<State> transitions;
+                if (!currentState.Transitions.TryGetValue(ic, out transitions))
+                    throw new Exception("Simulation: no transition for the symbol.");
+
+                if (transitions.Count > transitionToUse)
                 {
-                    currentState = currentState.Transition[ic][transitionToUse];
+                    currentState = transitions[transitionToUse];
+                }
+                else if (transitions.Count > 0)
+                {
+                    currentState = transitions[0];
                 }
                 else
                 {
-                    currentState = currentState.Transition[ic][0];
+                    throw new Exception("Simulation: no transition for the symbol.");
                 }
             }
 
             return currentState;
         }
 
-        private static State TransitPath(State s, params char?[] inputChars)
+        private static State Simulate(State s, params char?[] inputChars)
         {
-            return TransitPath(0, s, inputChars);
+            return Simulate(0, s, inputChars);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Scopus.LexicalAnalysis.RegExp
+﻿namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     internal class RepetitionAtLeastOneRegExp : RepetitionRegExp
     {
@@ -6,9 +6,9 @@
         {
         }
 
-        internal override NondeterministicFiniteAutomata AsNFA()
+        internal override FiniteAutomata AsNFA()
         {
-            var nfa = new NondeterministicFiniteAutomata("RepetitionAtLeastOneRegExpNFA");
+            var nfa = new FiniteAutomata("RepetitionAtLeastOneRegExpNFA");
             var innerExpNFA = ExpressionToRepeat.AsNFA();
             var innerExpNFA2 = ExpressionToRepeat.AsNFA();
 
@@ -19,6 +19,11 @@
             innerExpNFA2.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
 
             return nfa;
+        }
+
+        public override string ToString()
+        {
+            return "(" + ExpressionToRepeat + ")+";
         }
     }
 }
