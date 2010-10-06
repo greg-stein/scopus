@@ -59,7 +59,7 @@ namespace ScopusUnitTests
         public void TokensIteratorTest()
         {
             int tokensCount = 0;
-            var tokensCollection = new TokensCollection(lexer, null);
+            var tokensCollection = new TokensCollection(lexer);
 
             foreach (var lexeme in tokensCollection)
             {

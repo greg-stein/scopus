@@ -60,6 +60,7 @@
     <Compile Include="PerformanceComparisonTests.cs" />
     <Compile Include="ProofOfConceptTests.cs" />
     <Compile Include="RegExpSyntaxTreeTests.cs" />
+    <Compile Include="TableDrivenTransitionTests.cs" />
     <Compile Include="TokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

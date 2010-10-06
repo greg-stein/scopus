@@ -17,6 +17,7 @@ namespace Scopus.SyntaxAnalysis
 
 		private bool mExpressionChanged = true;
 		private int mTerminalsCount;
+
         internal int TerminalsCount
         {
             get

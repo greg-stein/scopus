@@ -36,6 +36,7 @@ namespace Scopus.SyntaxAnalysis
 		/// <exception cref="ArgumentOutOfRangeException">Thrown in case there is no such token value.</exception>
         public Token this[Terminal term]
         {
+            // TODO: Reverse order of popping tokens
             get
             {
                 if (term == null) throw new ArgumentNullException("term");

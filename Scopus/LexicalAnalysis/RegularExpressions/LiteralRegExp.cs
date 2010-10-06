@@ -1,30 +1,28 @@
 ﻿namespace Scopus.LexicalAnalysis.RegularExpressions
 {
+    /// <summary>
+    /// Represents literal regular expression for single character.
+    /// </summary>
     internal class LiteralRegExp : RegExp
     {
-        internal char Literal { get; private set; }
+        internal char LiteralSymbol { get; private set; }
 
         internal LiteralRegExp(char literal)
         {
-            Literal = literal;
-        }
-
-        protected override RegExp[] SubExpressions
-        {
-            get { return new RegExp[0]; } // return empty array
+            LiteralSymbol = literal;
         }
 
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("LiteralRegExpNFA");
-            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.For(Literal));
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.For(LiteralSymbol));
 
             return nfa;
         }
 
         public override string ToString()
         {
-            return Literal.ToString();
+            return LiteralSymbol.ToString();
         }
     }
 }

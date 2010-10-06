@@ -2,6 +2,9 @@
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
 {
+    /// <summary>
+    /// Represents alternation in regular expressions. I.e. a|b 
+    /// </summary>
     internal class AlternationRegExp : RegExp
     {
         internal RegExp Alternative1 { get; set; }
@@ -30,11 +33,6 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                     Alternative2 = new AlternationRegExp(Alternative2, alternatives[i]);
                 }
             }
-        }
-
-        protected override RegExp[] SubExpressions
-        {
-            get { return new[] {Alternative1, Alternative2}; }
         }
 
         internal override FiniteAutomata AsNFA()

@@ -67,9 +67,6 @@ namespace Scopus.LexicalAnalysis
 				if (mIndex < mCollection.Count - 1)
 				{
 					ConstructNextToken();
-					if (mCollection.HiddenTokens.Contains(mCurrent.Class))
-						continue;
-
 					return true;
 				}
 
@@ -83,9 +80,6 @@ namespace Scopus.LexicalAnalysis
 					((IEnumerator)this).Reset();
 					
 					ConstructNextToken();
-					if (mCollection.HiddenTokens.Contains(mCurrent.Class))
-						continue;
-
 					return true;
 				}
 

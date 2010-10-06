@@ -32,11 +32,6 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             }
         }
 
-        protected override RegExp[] SubExpressions
-        {
-            get { return new[] {RegExp1, RegExp2}; }
-        }
-
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("SequenceRegExpNFA", false);

@@ -2,6 +2,8 @@
 
 namespace Scopus.LexicalAnalysis
 {
+    //TODO: replace char? with byte?, since unicode will be supported by double transition 
+    //TODO: I.e. transition on first byte and second byte. 
     /// <summary>
     /// Represents single input char or epsilon
     /// </summary>
@@ -31,6 +33,17 @@ namespace Scopus.LexicalAnalysis
         internal static InputChar Epsilon()
         {
             return new InputChar(null);
+        }
+
+        public bool IsEpsilon()
+        {
+            return (this.value == null);
+        }
+
+        // Throws InvalidOperationException in case of value == null
+        public byte Value
+        {
+            get { return (byte) value; }
         }
 
         public bool Equals(InputChar other)

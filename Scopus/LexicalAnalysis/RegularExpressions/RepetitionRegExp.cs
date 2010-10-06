@@ -9,11 +9,6 @@
             ExpressionToRepeat = expression;
         }
 
-        protected override RegExp[] SubExpressions
-        {
-            get { return new[] {ExpressionToRepeat}; }
-        }
-
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("RepetitionRegExpNFA");

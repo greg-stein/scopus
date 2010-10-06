@@ -39,7 +39,7 @@ namespace Scopus.LexicalAnalysis
         }
         public TokensCollection TokensStream
         {
-            get { return new TokensCollection(this, Tokenizer.HiddenTokens); }
+            get { return new TokensCollection(this); }
         }
 
         public Lexer(ITokenizer tokenizer)

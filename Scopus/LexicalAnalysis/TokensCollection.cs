@@ -6,13 +6,9 @@ namespace Scopus.LexicalAnalysis
 {
     public class TokensCollection : ICollection<Token>
     {
-    	private static readonly HashSet<int> DefaultHiddenTokens = new HashSet<int>();
-
 		internal byte[] LexemesBuffer { get; private set; }
         internal int[] TokensIndices { get; private set; }
         internal int[] TokensClasses { get; private set; }
-
-		internal HashSet<int> HiddenTokens;
 
 		private readonly ILexer mLexer;
 
@@ -76,13 +72,12 @@ namespace Scopus.LexicalAnalysis
 
         #endregion
 
-        public TokensCollection(ILexer lexer, HashSet<int> hiddenTokens)
+        public TokensCollection(ILexer lexer)
         {
             mLexer = lexer;
 
             TokensIndices = lexer.TokensIndices;
             TokensClasses = lexer.TokensClasses;
-			HiddenTokens = (hiddenTokens) ?? DefaultHiddenTokens;
 
             RetrieveTokens();
         }

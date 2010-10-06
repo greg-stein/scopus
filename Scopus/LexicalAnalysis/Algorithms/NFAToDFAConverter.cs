@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Scopus.LexicalAnalysis.Algorithms
 {
     /// <summary>
-    /// Converts Nondeterministic Final Automata to Deterministic Final Automata using algorithm described in Dragon Book.
+    /// Converts Nondeterministic Final Automata to Deterministic Final Automata 
+    /// using algorithm described in Dragon Book.
     /// </summary>
-    internal class NFAToDFAConverter
+    internal static class NFAToDFAConverter
     {
 
         /// <summary>
-        /// Converts NFA to DFA
+        /// Converts NFA to DFA. The result DFA is not minimalized, hence it 
+        /// probably will contain redundant states.
         /// </summary>
         /// <param name="nfa">Finite automata representing NFA</param>
         /// <returns>Target DFA</returns>
@@ -33,7 +34,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
                     
                     if (u.Count <= 0) continue;
 
-                    State uState = null;
+                    State uState;
                     var stateKvp = GetStatesSet(dStates, u);
                     if (stateKvp == null)
                     {
@@ -50,12 +51,15 @@ namespace Scopus.LexicalAnalysis.Algorithms
             }
 
             DefineAcceptingStates(dStates);
-            var dfa = new FiniteAutomata("DFA");
-            dfa.StartState = startState;
+            var dfa = new FiniteAutomata("DFA") {StartState = startState};
 
             return dfa;
         }
 
+        /// <summary>
+        /// Sets IsAccepting property to accepting states.
+        /// </summary>
+        /// <param name="dStates">States of DFA</param>
         private static void DefineAcceptingStates(Dictionary<State, HashSet<State>> dStates)
         {
             foreach (var kvp in dStates)
@@ -71,7 +75,14 @@ namespace Scopus.LexicalAnalysis.Algorithms
             }
         }
 
-        private static KeyValuePair<State, HashSet<State>>? GetStatesSet(Dictionary<State, HashSet<State>> set, HashSet<State> state)
+        /// <summary>
+        /// Finds set in given distionary that contains exactly the same values as given set. 
+        /// </summary>
+        /// <param name="set">Dictionary of sets where the search is performed</param>
+        /// <param name="state">set-state to look for</param>
+        /// <returns>Returns KeyValuePair containing</returns>
+        private static KeyValuePair<State, HashSet<State>>? GetStatesSet(
+            Dictionary<State, HashSet<State>> set, HashSet<State> state)
         {
             foreach (var kvp in set)
             {
@@ -82,7 +93,8 @@ namespace Scopus.LexicalAnalysis.Algorithms
             return null;
         }
 
-        private static bool TryGetUnmarkedDState(Dictionary<State, HashSet<State>> dStates, Dictionary<State, bool> marked, out State unmarkedState)
+        private static bool TryGetUnmarkedDState(Dictionary<State, HashSet<State>> dStates,
+            Dictionary<State, bool> marked, out State unmarkedState)
         {
             unmarkedState = null;
 
@@ -102,7 +114,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
 
         private static HashSet<State> EpsilonClosure(State state)
         {
-            var set = new HashSet<State>() {state};
+            var set = new HashSet<State> {state};
             return EpsilonClosure(set);
         }
         

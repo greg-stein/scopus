@@ -3,7 +3,8 @@ using System.IO;
 namespace Scopus.LexicalAnalysis
 {
     /// <summary>
-    /// Represents lexer = LEXical analyzER. Lexical analysis is phase 
+    /// Represents lexer = LEXical analyzER. Lexical analysis is phase that is 
+    /// done prior to syntax analyzing (by Parser).
     /// </summary>
     public interface ILexer
     {

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Scopus.Auxiliary;
 using Scopus.Exceptions;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
 
 namespace Scopus.LexicalAnalysis
@@ -118,7 +120,28 @@ namespace Scopus.LexicalAnalysis
 
 		public int[] TokensIndices { get; set; }
 		public int[] TokensClasses { get; set; }
-		public HashSet<int> HiddenTokens { get; set; }
+
+        public void SetTransitionFunction(ITransitionFunction transitionFunction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Terminal UseTerminal(RegExp terminal)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void IgnoreTerminal(RegExp ignoree)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Terminal UseEpsilon()
+        {
+            throw new NotImplementedException();
+        }
+
+        public HashSet<int> HiddenTokens { get; set; }
 		public int TotalTokensCount
     	{
     		get

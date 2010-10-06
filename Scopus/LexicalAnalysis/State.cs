@@ -10,6 +10,7 @@ namespace Scopus.LexicalAnalysis
         internal string Name { get; private set;}
         internal bool IsAccepting { get; set; }
         internal int TokenClass { get; set; }
+        internal int Id { get; set; }
 
         internal State(string name)
         {
