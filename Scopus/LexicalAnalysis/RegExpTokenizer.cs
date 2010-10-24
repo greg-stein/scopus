@@ -25,6 +25,7 @@ namespace Scopus.LexicalAnalysis
         public void SetTransitionFunction(ITransitionFunction function)
         {
             transitionFunction = function;
+            classIdProvider.GetNext(); // skip 0, cuz it reserved for Epsilon terminal
         }
 
         public Terminal UseTerminal(RegExp regExp)

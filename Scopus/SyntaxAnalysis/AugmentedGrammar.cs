@@ -5,10 +5,6 @@
         public const int INITAL_SYMBOL_ID = 0;
         public const string INITAL_SYMBOL_NAME = "S'";
 
-        public AugmentedGrammar(int totalTerminalsCount) : base(totalTerminalsCount)
-        {
-        }
-
         public Production InitialProduction
         {
             get { return this[INITAL_SYMBOL_ID]; }

@@ -214,7 +214,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         private void BuildActionTable()
         {
             // this routine humbly expects that token ID provider will always be the simpliest one (next ID = ID++)
-            ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count,mG.TotalTerminalsCount];
+            ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count,mG.UsedTerminals.Count];
                 //mG.UsedTerminals.Count];
             int stateID;
 

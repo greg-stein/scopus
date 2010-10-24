@@ -38,7 +38,7 @@ namespace ScopusUnitTests
             rightBrace = tokenizer.AddToken(")");
             endMark = tokenizer.AddToken("$");
 
-            grammar = new AugmentedGrammar(tokenizer.TotalTokensCount)
+            grammar = new AugmentedGrammar()
                               {
                                   E --> E & plus & T,
                                   E --> T,

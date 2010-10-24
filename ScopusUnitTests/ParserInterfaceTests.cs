@@ -66,20 +66,20 @@ namespace ScopusUnitTests
 
             int testValue = 0;
 
-			var g = new Grammar(tokenizer.TotalTokensCount)
+			var g = new AugmentedGrammar()
                         {
-                            E --> T & F ^ (v => testValue = 3),
+                            E --> T & F ^ (v => testValue = 3), // Semantic action of production 1
                             T --> plus,
-                            E --> T & plus ^ (v => testValue = 5),
-                            E --> plus & mult & T ^ (v => testValue = 8),
+                            E --> T & plus ^ (v => testValue = 5), // production 3
+                            E --> plus & mult & T ^ (v => testValue = 8), //production 4
                         };
 
             Assert.That(testValue, Is.EqualTo(0));
-            g.Productions[0].SemanticAction(null);
+            g.Productions[1].SemanticAction(null);
             Assert.That(testValue, Is.EqualTo(3));
-            g.Productions[2].SemanticAction(null);
-            Assert.That(testValue, Is.EqualTo(5));
             g.Productions[3].SemanticAction(null);
+            Assert.That(testValue, Is.EqualTo(5));
+            g.Productions[4].SemanticAction(null);
             Assert.That(testValue, Is.EqualTo(8));
         }
 
@@ -123,7 +123,7 @@ namespace ScopusUnitTests
         public void AugmentedGrammarInitialProductionTest()
         {
             var P = new NonTerminal("P");
-			var g = new AugmentedGrammar(1)
+			var g = new AugmentedGrammar()
                         {
                             P --> P
                         };

@@ -4,6 +4,7 @@ using System.IO;
 using NUnit.Framework;
 using Scopus.Exceptions;
 using Scopus.LexicalAnalysis;
+using Scopus.LexicalAnalysis.Algorithms;
 using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
 using Scopus.SyntaxAnalysis.ParsingTables;
@@ -32,12 +33,13 @@ namespace ScopusUnitTests
 			string fileName;
 			ILexer lexer;
 			Stream fileStream;
-            KeywordsTokenizer tokenizer;
+            RegExpTokenizer tokenizer;
 
 
 			fileName = Path.GetTempFileName();
 			File.WriteAllText(fileName, INPUT);
-            tokenizer = new KeywordsTokenizer();
+            tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
 			lexer = new Lexer(tokenizer);
 			fileStream = File.OpenRead(fileName);
 			lexer.SetDataSource(fileStream);
@@ -214,13 +216,19 @@ namespace ScopusUnitTests
             var T = new NonTerminal("T");
             var F = new NonTerminal("F");
 
-            var id = tokenizer.AddToken("[0-9]+");
-            var plus = tokenizer.AddToken("+");
-            var mult = tokenizer.AddToken("*");
-            var leftBrace = tokenizer.AddToken("(");
-            var rightBrace = tokenizer.AddToken(")");
+            var id = tokenizer.UseTerminal(RegExp.AtLeastOneOf(RegExp.Choice(
+                RegExp.Literal('0'), RegExp.Literal('1'), RegExp.Literal('2'),
+                RegExp.Literal('3'), RegExp.Literal('4'), RegExp.Literal('5'),
+                RegExp.Literal('6'), RegExp.Literal('7'), RegExp.Literal('8'),
+                RegExp.Literal('9'))));
+			var plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+			var mult = tokenizer.UseTerminal(RegExp.Literal('*'));
+			var leftBrace = tokenizer.UseTerminal(RegExp.Literal('('));
+            var rightBrace = tokenizer.UseTerminal(RegExp.Literal(')'));
 
-			var grammar = new AugmentedGrammar(tokenizer.TotalTokensCount)
+            tokenizer.BuildTransitions();
+
+			var grammar = new AugmentedGrammar()
                               {
                                   E --> E & plus & T ^ (v => stack.Push(stack.Pop() + stack.Pop())),
                                   E --> T,
@@ -259,7 +267,7 @@ namespace ScopusUnitTests
 			var assign = tokenizer.AddToken("=");
 			var deref = tokenizer.AddToken("*");
 
-			var grammar = new AugmentedGrammar(tokenizer.TotalTokensCount)
+			var grammar = new AugmentedGrammar()
                               {
 								  E --> L & assign & R,
 								  E --> R,
@@ -272,13 +280,14 @@ namespace ScopusUnitTests
 		}
 
 		[Test]
-		public void ArithmeticStatementFullyAutonomousParseTest()
+        public void ArithmeticStatementFullyAutonomousParseTest()
 		{
 			const string INPUT = @"2*(3+4)";
 
 			string fileName = Path.GetTempFileName();
 			File.WriteAllText(fileName, INPUT);
             RegExpTokenizer tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
 			ILexer lexer = new Lexer(tokenizer);
 			Stream fileStream = File.OpenRead(fileName);
 			lexer.SetDataSource(fileStream);
@@ -301,7 +310,9 @@ namespace ScopusUnitTests
 			var leftBrace = tokenizer.UseTerminal(RegExp.Literal('('));
             var rightBrace = tokenizer.UseTerminal(RegExp.Literal(')'));
 
-			var grammar = new AugmentedGrammar(tokenizer.TotalTokensCount)
+            tokenizer.BuildTransitions();
+
+			var grammar = new AugmentedGrammar()
                               {
                                   E --> E & plus & T ^ (v => stack.Push(stack.Pop() + stack.Pop())),
                                   E --> T,

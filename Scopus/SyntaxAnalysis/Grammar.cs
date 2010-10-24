@@ -5,9 +5,7 @@ namespace Scopus.SyntaxAnalysis
 {
     public class Grammar : ICollection<Production>
     {
-        internal int TotalTerminalsCount; // total amount of tokens (terminals) added to tokenizer
-
-        private Grammar()
+        protected Grammar()
         {
             Productions = new List<Production>();
             NonTerminals = new List<NonTerminal>();
@@ -17,11 +15,6 @@ namespace Scopus.SyntaxAnalysis
             var endMark = new Terminal(Terminal.END_MARKER_TOKEN_NAME, Terminal.END_MARKER_TOKEN_ID);
             UsedTerminals.Add(endMark);
             GrammarSymbols.Add(endMark);
-        }
-
-        public Grammar(int totalTerminalsCount) : this()
-        {
-            TotalTerminalsCount = totalTerminalsCount;
         }
 
         internal List<Production> Productions { get; private set; }
