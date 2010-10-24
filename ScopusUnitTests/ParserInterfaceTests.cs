@@ -33,7 +33,7 @@ namespace ScopusUnitTests
 
             var prod = E --> T & mult & leftBrace &  plus & rightBrace;
 
-			Assert.That(prod.ToString(), Is.EqualTo("E --> T * ( " + " + " + " )"));
+			Assert.That(prod.ToString(), Is.EqualTo("E --> T * ( " + "+" + " )"));
             Console.WriteLine(prod);
         }
 

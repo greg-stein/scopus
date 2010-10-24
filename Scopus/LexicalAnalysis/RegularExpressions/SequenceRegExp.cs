@@ -4,13 +4,11 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     internal class SequenceRegExp : RegExp
     {
-        internal RegExp RegExp1 { get; set; }
-        internal RegExp RegExp2 { get; set; }
-
         internal SequenceRegExp(RegExp regExp1, RegExp regExp2)
         {
             RegExp1 = regExp1;
             RegExp2 = regExp2;
+            ChildExpressions = new[] {regExp1, regExp2};
         }
 
         internal SequenceRegExp(params RegExp[] regExps)
@@ -32,11 +30,14 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             }
         }
 
+        internal RegExp RegExp1 { get; set; }
+        internal RegExp RegExp2 { get; set; }
+
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("SequenceRegExpNFA", false);
-            var regExp1AsNFA = RegExp1.AsNFA();
-            var regExp2AsNFA = RegExp2.AsNFA();
+            FiniteAutomata regExp1AsNFA = RegExp1.AsNFA();
+            FiniteAutomata regExp2AsNFA = RegExp2.AsNFA();
             nfa.StartState = regExp1AsNFA.StartState;
             nfa.Terminator = regExp2AsNFA.Terminator;
             regExp1AsNFA.Terminator.AddTransitionTo(regExp2AsNFA.StartState, InputChar.Epsilon());

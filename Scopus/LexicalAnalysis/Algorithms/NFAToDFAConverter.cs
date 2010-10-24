@@ -8,7 +8,6 @@ namespace Scopus.LexicalAnalysis.Algorithms
     /// </summary>
     internal static class NFAToDFAConverter
     {
-
         /// <summary>
         /// Converts NFA to DFA. The result DFA is not minimalized, hence it 
         /// probably will contain redundant states.
@@ -28,14 +27,16 @@ namespace Scopus.LexicalAnalysis.Algorithms
             {
                 marked[tState] = true;
 
-                for (var a = char.MinValue; a < char.MaxValue; a++)
+                for (int i = byte.MinValue; i <= byte.MaxValue; i++)
                 {
-                    var u = EpsilonClosure(Move(dStates[tState], InputChar.For(a)));
-                    
+                    byte a = (byte) i;
+
+                    HashSet<State> u = EpsilonClosure(Move(dStates[tState], InputChar.For(a)));
+
                     if (u.Count <= 0) continue;
 
                     State uState;
-                    var stateKvp = GetStatesSet(dStates, u);
+                    KeyValuePair<State, HashSet<State>>? stateKvp = GetStatesSet(dStates, u);
                     if (stateKvp == null)
                     {
                         uState = new State("DFA state");
@@ -44,7 +45,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
                     }
                     else
                     {
-                        uState = ((KeyValuePair<State, HashSet<State>>)stateKvp).Key;
+                        uState = ((KeyValuePair<State, HashSet<State>>) stateKvp).Key;
                     }
                     tState.AddTransitionTo(uState, InputChar.For(a));
                 }
@@ -69,6 +70,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
                     if (state.IsAccepting)
                     {
                         kvp.Key.IsAccepting = true;
+                        kvp.Key.TokenClass = state.TokenClass;
                         break;
                     }
                 }
@@ -94,7 +96,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
         }
 
         private static bool TryGetUnmarkedDState(Dictionary<State, HashSet<State>> dStates,
-            Dictionary<State, bool> marked, out State unmarkedState)
+                                                 Dictionary<State, bool> marked, out State unmarkedState)
         {
             unmarkedState = null;
 
@@ -102,7 +104,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
             {
                 bool isMarked;
                 marked.TryGetValue(dState.Key, out isMarked);
-                if ( ! isMarked )
+                if (! isMarked)
                 {
                     unmarkedState = dState.Key;
                     return true;
@@ -117,7 +119,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
             var set = new HashSet<State> {state};
             return EpsilonClosure(set);
         }
-        
+
         private static HashSet<State> EpsilonClosure(HashSet<State> states)
         {
             var stack = new Stack<State>(states);
@@ -126,7 +128,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
             // Utilize BFS-like algorithm
             while (stack.Count > 0)
             {
-                var topState = stack.Pop();
+                State topState = stack.Pop();
                 List<State> epsilonTransitions;
                 if (topState.Transitions.TryGetValue(InputChar.Epsilon(), out epsilonTransitions))
                 {

@@ -54,12 +54,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuxiliaryTests.cs" />
+    <Compile Include="FiniteAutomatonTests.cs" />
     <Compile Include="LexerTests.cs" />
     <Compile Include="ParserInterfaceTests.cs" />
     <Compile Include="ParsingTableGenerationTests.cs" />
     <Compile Include="PerformanceComparisonTests.cs" />
     <Compile Include="ProofOfConceptTests.cs" />
     <Compile Include="RegExpSyntaxTreeTests.cs" />
+    <Compile Include="RegExpTokenizerTests.cs" />
     <Compile Include="TableDrivenTransitionTests.cs" />
     <Compile Include="TokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

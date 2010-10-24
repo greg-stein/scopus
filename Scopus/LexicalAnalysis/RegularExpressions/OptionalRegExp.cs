@@ -5,17 +5,18 @@
     /// </summary>
     internal class OptionalRegExp : RegExp
     {
-        internal RegExp OptionalExpression { get; set; }
-
         internal OptionalRegExp(RegExp optionalExpr)
         {
             OptionalExpression = optionalExpr;
+            ChildExpressions = new[] {optionalExpr};
         }
+
+        internal RegExp OptionalExpression { get; set; }
 
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("OptionalRegExpNFA");
-            var optionalExpNFA = OptionalExpression.AsNFA();
+            FiniteAutomata optionalExpNFA = OptionalExpression.AsNFA();
             nfa.StartState.AddTransitionTo(optionalExpNFA.StartState, InputChar.Epsilon());
             nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());
             optionalExpNFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());

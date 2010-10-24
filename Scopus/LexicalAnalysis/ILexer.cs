@@ -1,4 +1,5 @@
 using System.IO;
+using System.Text;
 
 namespace Scopus.LexicalAnalysis
 {
@@ -29,6 +30,16 @@ namespace Scopus.LexicalAnalysis
         int[] TokensClasses { get; }
 
         /// <summary>
+        /// Gets or sets <see cref="ITokenizer"/> for lexer.
+        /// </summary>
+        ITokenizer Tokenizer { get; set; }
+
+        /// <summary>
+        /// Gets tokens as enumerable collection. This is more convinient way to scan input.
+        /// </summary>
+        TokensCollection TokensStream { get; }
+
+        /// <summary>
         /// Sets stream as source of data which should be analyzed (tokenized).
         /// </summary>
         /// <param name="stream">Data source.</param>
@@ -43,13 +54,9 @@ namespace Scopus.LexicalAnalysis
         bool ReadTokens();
 
         /// <summary>
-        /// Gets or sets <see cref="ITokenizer"/> for lexer.
+        /// Sets encoding to use in lexical analysis
         /// </summary>
-        ITokenizer Tokenizer { get; set; }
-
-        /// <summary>
-        /// Gets tokens as enumerable collection. This is more convinient way to scan input.
-        /// </summary>
-        TokensCollection TokensStream { get; }
+        /// <param name="encoding">Encoding being used in lexical analysis. Default is Encoding.ASCII.</param>
+        void SetEncoding(Encoding encoding);
     }
 }

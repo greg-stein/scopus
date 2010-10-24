@@ -4,19 +4,19 @@ namespace Scopus.LexicalAnalysis
 {
     internal class State
     {
-        internal readonly Dictionary<InputChar, List<State>> Transitions = 
+        internal readonly Dictionary<InputChar, List<State>> Transitions =
             new Dictionary<InputChar, List<State>>();
-
-        internal string Name { get; private set;}
-        internal bool IsAccepting { get; set; }
-        internal int TokenClass { get; set; }
-        internal int Id { get; set; }
 
         internal State(string name)
         {
             Name = name;
             IsAccepting = false;
         }
+
+        internal string Name { get; private set; }
+        internal bool IsAccepting { get; set; }
+        internal int TokenClass { get; set; }
+        internal int Id { get; set; }
 
         /// <summary>
         /// Adds transition to given state on input char
@@ -33,7 +33,7 @@ namespace Scopus.LexicalAnalysis
             }
             else
             {
-                Transitions[iChar] = new List<State>() {state};
+                Transitions[iChar] = new List<State> {state};
             }
         }
 

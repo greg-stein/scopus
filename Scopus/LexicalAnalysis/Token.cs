@@ -6,46 +6,37 @@ namespace Scopus.LexicalAnalysis
     public class Token : ICloneable, IEquatable<Token>, IDisposable
     {
         public const int UNDEFINED_CLASS = -1;
+
         private static readonly uint[] LENGTH_MASKS =
             new uint[]
                 {
                     0x00000000, 0x000000FF, 0x0000FFFF, 0x00FFFFFF
                 };
 
+        internal Token()
+        {
+        }
+
+        internal Token(string lexemeStr)
+        {
+            InitializeTo(lexemeStr);
+        }
+
+        internal Token(byte[] buffer, int offset, int length)
+        {
+            InitializeTo(buffer, offset, length);
+        }
+
+        internal Token(ArraySegment<byte> data) : this(data.Array, data.Offset, data.Count)
+        {
+        }
+
         public byte[] Buffer { get; set; }
         public int Offset { get; set; }
         public int Length { get; set; }
         public int Class { get; set; }
 
-        internal Token()
-        {
-        }
-        internal Token(string lexemeStr)
-        {
-            InitializeTo(lexemeStr);
-        }
-        internal Token(byte[] buffer, int offset, int length)
-        {
-            InitializeTo(buffer, offset, length);
-        }
-        internal Token(ArraySegment<byte> data) : this(data.Array, data.Offset, data.Count)
-        {
-        }
-
-        private void InitializeTo(string lexemeStr)
-        {
-            Buffer = Encoding.ASCII.GetBytes(lexemeStr);
-            Offset = 0;
-            Length = lexemeStr.Length;
-            Class = UNDEFINED_CLASS;
-        }
-        private void InitializeTo(byte[] buffer, int offset, int length)
-        {
-            Buffer = buffer;
-            Offset = offset;
-            Length = length;
-            Class = UNDEFINED_CLASS;
-        }
+        #region ICloneable Members
 
         public object Clone()
         {
@@ -54,33 +45,32 @@ namespace Scopus.LexicalAnalysis
             return MemberwiseClone();
         }
 
-        // http://en.wikipedia.org/wiki/Fowler_Noll_Vo_hash
-        public override int GetHashCode()
+        #endregion
+
+        #region IDisposable Members
+
+        public void Dispose()
         {
-            const int P = 16777619; // FNV prime
-
-            unchecked
-            {
-                int hash = (int)2166136261; // FNV offset basis
-
-                for (int i = Offset; i < Offset + Length; i++)
-                    hash = (hash ^ Buffer[i]) * P;
-
-                return hash;
-            }
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+
+        #endregion
+
+        #region IEquatable<Token> Members
+
         public unsafe bool Equals(Token other)
         {
-            if (this.Length != other.Length)
+            if (Length != other.Length)
                 return false;
-            if (this.Class != other.Class)
+            if (Class != other.Class)
                 return false;
 
             fixed (byte* buffOtherB = other.Buffer)
-            fixed (byte* buffThisB = this.Buffer)
+            fixed (byte* buffThisB = Buffer)
             {
-                int* buffOtherI = (int*)(buffOtherB + other.Offset);
-                int* buffThisI = (int*)(buffThisB + Offset);
+                var buffOtherI = (int*) (buffOtherB + other.Offset);
+                var buffThisI = (int*) (buffThisB + Offset);
 
                 int length = Length >> 2;
                 int i;
@@ -100,6 +90,41 @@ namespace Scopus.LexicalAnalysis
                 return true;
             }
         }
+
+        #endregion
+
+        private void InitializeTo(string lexemeStr)
+        {
+            Buffer = Encoding.ASCII.GetBytes(lexemeStr);
+            Offset = 0;
+            Length = lexemeStr.Length;
+            Class = UNDEFINED_CLASS;
+        }
+
+        private void InitializeTo(byte[] buffer, int offset, int length)
+        {
+            Buffer = buffer;
+            Offset = offset;
+            Length = length;
+            Class = UNDEFINED_CLASS;
+        }
+
+        // http://en.wikipedia.org/wiki/Fowler_Noll_Vo_hash
+        public override int GetHashCode()
+        {
+            const int P = 16777619; // FNV prime
+
+            unchecked
+            {
+                var hash = (int) 2166136261; // FNV offset basis
+
+                for (int i = Offset; i < Offset + Length; i++)
+                    hash = (hash ^ Buffer[i])*P;
+
+                return hash;
+            }
+        }
+
         public override bool Equals(Object obj)
         {
             if (obj == null) return base.Equals(obj);
@@ -109,6 +134,7 @@ namespace Scopus.LexicalAnalysis
 
             return false;
         }
+
         public override string ToString()
         {
             return AsString();
@@ -118,16 +144,16 @@ namespace Scopus.LexicalAnalysis
         {
             return PrimitivesParser.ParseString(this);
         }
+
         public int AsInt()
         {
             return PrimitivesParser.ParseInt(this);
         }
-		public float AsFloat()
-		{
-			return PrimitivesParser.ParseFloat(this);
-		}
 
-        #region IDisposable Members
+        public float AsFloat()
+        {
+            return PrimitivesParser.ParseFloat(this);
+        }
 
         ~Token()
         {
@@ -142,13 +168,5 @@ namespace Scopus.LexicalAnalysis
             }
             // free native resources
         }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
     }
 }

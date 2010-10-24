@@ -8,55 +8,58 @@ namespace Scopus.SyntaxAnalysis
 {
     public class LRParser : IParser
     {
-        public ParsingTable ParsingTable { get; set; }
-        public Grammar Grammar { get; set; }
-        public ILexer Lexer { get; set; }
-
-		public event SyntaxErrorEventHandler SyntaxError;
-        public event EventHandler InputAccepted;
-
-        private readonly TerminalValues mValues = new TerminalValues();
         private readonly Stack<int> mStatesStack = new Stack<int>();
+        private readonly TerminalValues mValues = new TerminalValues();
 
         public LRParser()
         {
             SyntaxError += DefaultErrorRecoveryRoutine;
         }
 
+        public ParsingTable ParsingTable { get; set; }
+
+        #region IParser Members
+
+        public Grammar Grammar { get; set; }
+        public ILexer Lexer { get; set; }
+
+        public event SyntaxErrorEventHandler SyntaxError;
+        public event EventHandler InputAccepted;
+
         public void ParseInput()
         {
             mStatesStack.Push(0);
 
-            var tokenEnumerator = Lexer.TokensStream.GetEnumerator();
+            IEnumerator<Token> tokenEnumerator = Lexer.TokensStream.GetEnumerator();
             tokenEnumerator.MoveNext();
 
-            while(true)
+            while (true)
             {
-                var s = mStatesStack.Peek();
-                var actionEntry = ParsingTable.ActionTable[s, tokenEnumerator.Current.Class];
+                int s = mStatesStack.Peek();
+                ActionTableEntry actionEntry = ParsingTable.ActionTable[s, tokenEnumerator.Current.Class];
 
-				// todo: TRACE option
-				//Trace(actionEntry, tokenEnumerator.Current);
+                // todo: TRACE option
+                //Trace(actionEntry, tokenEnumerator.Current);
 
-				if (actionEntry.Action == ParserAction.Shift)
+                if (actionEntry.Action == ParserAction.Shift)
                 {
                     mStatesStack.Push(actionEntry.Destination);
-                    mValues.PushToken((Token)tokenEnumerator.Current.Clone());
+                    mValues.PushToken((Token) tokenEnumerator.Current.Clone());
 
-					if (!tokenEnumerator.MoveNext())
+                    if (!tokenEnumerator.MoveNext())
                         OnSyntaxError(new ParserContext(mStatesStack, Lexer, tokenEnumerator.Current));
                 }
                 else if (actionEntry.Action == ParserAction.Reduce)
                 {
-                    var production = Grammar.Productions[actionEntry.Destination];
+                    Production production = Grammar.Productions[actionEntry.Destination];
                     for (int i = 0; i < production.Expression.Count; i++)
                         mStatesStack.Pop();
 
-                    var state = mStatesStack.Peek();
-					mStatesStack.Push(ParsingTable.GotoTable[state, production.Symbol.ID]);
+                    int state = mStatesStack.Peek();
+                    mStatesStack.Push(ParsingTable.GotoTable[state, production.Symbol.ID]);
                     mValues.SetPopableTokensCount(production.TerminalsCount);
                     production.PerformSemanticAction(mValues);
-					mValues.RemoveUnusedTokens();
+                    mValues.RemoveUnusedTokens();
                 }
                 else if (actionEntry.Action == ParserAction.Accept)
                 {
@@ -70,9 +73,11 @@ namespace Scopus.SyntaxAnalysis
             }
         }
 
+        #endregion
+
         private void Trace(ActionTableEntry action, Token current)
         {
-            var actionStr = string.Empty;
+            string actionStr = string.Empty;
 
             switch (action.Action)
             {

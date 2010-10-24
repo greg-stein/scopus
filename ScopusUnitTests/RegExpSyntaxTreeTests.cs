@@ -10,13 +10,31 @@ namespace ScopusUnitTests
     [TestFixture]
     public class RegExpNFAConstructionTests
     {
+        private const byte CODE_A = (byte)'a';
+        private const byte CODE_B = (byte)'b';
+        private const byte CODE_C = (byte)'c';
+
+        [Test]
+        public void AcceptingStatePreserveTest()
+        {
+            RegExp re = RegExp.Literal('a');
+            var nfa = re.AsNFA(true); // True - mark terminator as accepting state
+            nfa.Terminator.TokenClass = 5; // Token ID
+            var dfa = NFAToDFAConverter.Convert(nfa);
+
+            var accState = Simulate(dfa.StartState, CODE_A);
+
+            Assert.That(accState.IsAccepting);
+            Assert.That(accState.TokenClass, Is.EqualTo(5));
+        }
+
         [Test]
         public void NfaToDfaConversionSimpleTest()
         {
             RegExp re = RegExp.Literal('a');
             var dfa = NFAToDFAConverter.Convert(re.AsNFA(true));
 
-            Assert.True(Simulate(0, dfa.StartState, 'a').IsAccepting);
+            Assert.True(Simulate(0, dfa.StartState, CODE_A).IsAccepting);
         }
 
         [Test]
@@ -27,7 +45,7 @@ namespace ScopusUnitTests
                 RegExp.Literal('a'));
             var dfa = NFAToDFAConverter.Convert(re.AsNFA(true));
 
-            var str = new char?[] {'a', 'b', 'c', 'a'};
+            var str = new byte?[] { CODE_A, CODE_B, CODE_C, CODE_A };
 
             Assert.True(Simulate(0, dfa.StartState, str).IsAccepting);
         }
@@ -42,7 +60,8 @@ namespace ScopusUnitTests
 
             var nfa = regExp.AsNFA();
 
-            Assert.That(nfa.StartState.Transitions[InputChar.For(LITERAL)], Is.EquivalentTo(new List<State> {nfa.Terminator}));
+            Assert.That(nfa.StartState.Transitions[InputChar.For((byte) LITERAL)], 
+                Is.EquivalentTo(new List<State> {nfa.Terminator}));
         }
 
         [Test]
@@ -51,7 +70,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Sequence(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, 'a', null, 'b'), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, CODE_A, null, CODE_B), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -60,8 +79,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.Choice(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, nfa.StartState, null, 'b', null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, nfa.StartState, null, CODE_B, null), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -70,7 +89,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Optional(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, 'a', null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
             Assert.That(Simulate(1, nfa.StartState, null), Is.EqualTo(nfa.Terminator));
         }
 
@@ -80,9 +99,9 @@ namespace ScopusUnitTests
             var regExp = RegExp.AnyNumberOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, 'a', null),  Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, nfa.StartState, new char?[] { null }), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, Simulate(nfa.StartState, null, 'a'), null),Is.EqualTo(Simulate(nfa.StartState, null)));
+            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, nfa.StartState, new byte?[] { null }), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A), null), Is.EqualTo(Simulate(nfa.StartState, null)));
         }
 
         [Test]
@@ -90,21 +109,21 @@ namespace ScopusUnitTests
         {
             var regExp = RegExp.AtLeastOneOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
-            
-            Assert.That(Simulate(nfa.StartState, null, 'a', null, 'a', null), Is.EqualTo(Simulate(nfa.StartState, null, 'a', null)));
-            Assert.That(Simulate(nfa.StartState, null, 'a', null, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, Simulate(nfa.StartState, null, 'a', null, 'a'), null), Is.EqualTo(nfa.Terminator));
+
+            Assert.That(Simulate(nfa.StartState, null, CODE_A, null, CODE_A, null), Is.EqualTo(Simulate(nfa.StartState, null, CODE_A, null)));
+            Assert.That(Simulate(nfa.StartState, null, CODE_A, null, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A, null, CODE_A), null), Is.EqualTo(nfa.Terminator));
         }
 
-        private static State Simulate(int transitionToUse, State s, params char?[] inputChars)
+        private static State Simulate(int transitionToUse, State s, params byte?[] inputChars)
         {
             if (inputChars == null)
-                inputChars = new char?[] {null};
+                inputChars = new byte?[] {null};
 
             State currentState = s;
             foreach (var inputChar in inputChars)
             {
-                var ic = inputChar == null ? InputChar.Epsilon() : InputChar.For((char)inputChar);
+                var ic = inputChar == null ? InputChar.Epsilon() : InputChar.For((byte) inputChar);
                 List<State> transitions;
                 if (!currentState.Transitions.TryGetValue(ic, out transitions))
                     throw new Exception("Simulation: no transition for the symbol.");
@@ -126,7 +145,7 @@ namespace ScopusUnitTests
             return currentState;
         }
 
-        private static State Simulate(State s, params char?[] inputChars)
+        private static State Simulate(State s, params byte?[] inputChars)
         {
             return Simulate(0, s, inputChars);
         }

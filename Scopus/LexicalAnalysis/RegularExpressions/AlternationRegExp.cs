@@ -7,13 +7,11 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
     /// </summary>
     internal class AlternationRegExp : RegExp
     {
-        internal RegExp Alternative1 { get; set; }
-        internal RegExp Alternative2 { get; set; }
-
         internal AlternationRegExp(RegExp alternative1, RegExp alternative2)
         {
             Alternative1 = alternative1;
             Alternative2 = alternative2;
+            ChildExpressions = new[] {alternative1, alternative2};
         }
 
         internal AlternationRegExp(params RegExp[] alternatives)
@@ -35,11 +33,14 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             }
         }
 
+        internal RegExp Alternative1 { get; set; }
+        internal RegExp Alternative2 { get; set; }
+
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("AlternationRegExpNFA");
-            var alternative1NFA = Alternative1.AsNFA();
-            var alternative2NFA = Alternative2.AsNFA();
+            FiniteAutomata alternative1NFA = Alternative1.AsNFA();
+            FiniteAutomata alternative2NFA = Alternative2.AsNFA();
             nfa.StartState.AddTransitionTo(alternative1NFA.StartState, InputChar.Epsilon());
             nfa.StartState.AddTransitionTo(alternative2NFA.StartState, InputChar.Epsilon());
             alternative1NFA.Terminator.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());

@@ -5,11 +5,9 @@ namespace Scopus.Auxiliary
     public class IDProvider
     {
         private const int INITIAL_ID = -1;
-        private int start = INITIAL_ID;
-        private int max = -1;
+        private readonly int max = -1;
+        private readonly int start = INITIAL_ID;
         private int mCurrentInt;
-
-        public bool RollingCounter { get; set; }
 
         public IDProvider()
         {
@@ -26,6 +24,8 @@ namespace Scopus.Auxiliary
         {
             this.max = max;
         }
+
+        public bool RollingCounter { get; set; }
 
         internal void Reset()
         {

@@ -14,37 +14,35 @@ namespace Scopus.LexicalAnalysis
         protected const int INITIAL_STATE = 0;
         protected const int WRONG_STATE = -1;
 
-		private const int CHARS_COUNT = Byte.MaxValue + 1;
-		internal const int INITIAL_STATES_COUNT = Byte.MaxValue + 1;
+        private const int CHARS_COUNT = Byte.MaxValue + 1;
+        internal const int INITIAL_STATES_COUNT = Byte.MaxValue + 1;
 
 // ReSharper disable CharImplicitlyConvertedToNumeric
-		protected const int ASCII_ZERO = '0';
-		protected const int ASCII_NINE = '9';
+        protected const int ASCII_ZERO = '0';
+        protected const int ASCII_NINE = '9';
 
-		protected const int ASCII_A_SM = 'a';
-		protected const int ASCII_Z_SM = 'z';
-		protected const int ASCII_A_BG = 'A';
-		protected const int ASCII_Z_BG = 'Z';
+        protected const int ASCII_A_SM = 'a';
+        protected const int ASCII_Z_SM = 'z';
+        protected const int ASCII_A_BG = 'A';
+        protected const int ASCII_Z_BG = 'Z';
 
-		protected const int ASCII_CR = '\r';
-		protected const int ASCII_LF = '\n';
+        protected const int ASCII_CR = '\r';
+        protected const int ASCII_LF = '\n';
 
-		protected const int ASCII_MINUS = '-';
-		protected const int ASCII_PLUS = '+';
-		protected const int ASCII_DOT = '.';
-		protected const int ASCII_UNDERSCORE = '_';
+        protected const int ASCII_MINUS = '-';
+        protected const int ASCII_PLUS = '+';
+        protected const int ASCII_DOT = '.';
+        protected const int ASCII_UNDERSCORE = '_';
 // ReSharper restore CharImplicitlyConvertedToNumeric
 
-		protected const char ASCII_SPACE = ' ';
-		protected const char ASCII_TAB = '\t';
+        protected const char ASCII_SPACE = ' ';
+        protected const char ASCII_TAB = '\t';
 
 
-		protected List<int[]> TransitionsTable = new List<int[]>(INITIAL_STATES_COUNT);
-		protected HashSet<int> AcceptingStates = new HashSet<int>();
-		protected Dictionary<int, int> StateToTokenID = new Dictionary<int, int>();	// associates state IDs with token IDs
+        protected HashSet<int> AcceptingStates = new HashSet<int>();
 
-        protected IDProvider StateIdProvider = new IDProvider();
         protected IDProvider ClassIdProvider = new IDProvider();
+        protected int EndlineStateValue;
 
         /*
 		protected Terminal IntegerNumberValue;
@@ -85,16 +83,34 @@ namespace Scopus.LexicalAnalysis
 		//    }
 		//}
 		*/
-		protected Terminal EndlineValue;
-		public Terminal Endline
-		{
-			get
-			{
-				InitEndlineToken();
-				return EndlineValue;
-			}
-		}
-		protected int EndlineStateValue;
+        protected Terminal EndlineValue;
+        protected IDProvider StateIdProvider = new IDProvider();
+
+        protected Dictionary<int, int> StateToTokenID = new Dictionary<int, int>();
+                                       // associates state IDs with token IDs
+
+        protected List<int[]> TransitionsTable = new List<int[]>(INITIAL_STATES_COUNT);
+
+        public KeywordsTokenizer()
+        {
+            HiddenTokens = new HashSet<int>();
+
+            CreateNewState(); // starting from 0
+
+            ClassIdProvider.GetNext();
+                // the ID == 0 is reserved for synthetic (generated at enumeration) END_MARK (<end>) token
+        }
+
+        public Terminal Endline
+        {
+            get
+            {
+                InitEndlineToken();
+                return EndlineValue;
+            }
+        }
+
+        public HashSet<int> HiddenTokens { get; set; }
 
         /*
 		protected Terminal StringIdentifierValue;
@@ -118,10 +134,12 @@ namespace Scopus.LexicalAnalysis
 		
 		*/
 
-		public int[] TokensIndices { get; set; }
-		public int[] TokensClasses { get; set; }
+        #region ITokenizer Members
 
-        public void SetTransitionFunction(ITransitionFunction transitionFunction)
+        public int[] TokensIndices { get; set; }
+        public int[] TokensClasses { get; set; }
+
+        public void SetTransitionFunction(ITransitionFunction function)
         {
             throw new NotImplementedException();
         }
@@ -141,83 +159,101 @@ namespace Scopus.LexicalAnalysis
             throw new NotImplementedException();
         }
 
-        public HashSet<int> HiddenTokens { get; set; }
-		public int TotalTokensCount
-    	{
-    		get
-    		{
-    			return ClassIdProvider.GetCurrent() + 1;	// plus one for predefined <end>
-    		}
-    	}
+        public int TotalTokensCount
+        {
+            get { return ClassIdProvider.GetCurrent() + 1; // plus one for predefined <end>
+            }
+        }
 
-		
-		public KeywordsTokenizer()
-		{
-			HiddenTokens = new HashSet<int>();
-			
-			CreateNewState();			// starting from 0
-			
-			ClassIdProvider.GetNext();	// the ID == 0 is reserved for synthetic (generated at enumeration) END_MARK (<end>) token
-		}
+        public void SetEncoding(Encoding encoding)
+        {
+            // throw new NotImplementedException();
+        }
 
-		public Terminal AddToken(string tokenString)
-		{
-			return new Terminal(tokenString, AddToken(tokenString, -1).Value);
-		}
+        public void BuildTransitions()
+        {
+            //throw new NotImplementedException();
+        }
 
-		private KeyValuePair<int, int> AddToken(string tokenString, int desiredClass)
-		{
-			if (String.IsNullOrEmpty(tokenString)) throw new ArgumentNullException("tokenString");
+        public int Tokenize(byte[] buffer, int offset, int length)
+        {
+            int tokensCount = 0;
 
-			var state = IntegrateToken(Encoding.ASCII.GetBytes(tokenString));
+            for (int i = offset; i < offset + length;)
+            {
+                TokensIndices[tokensCount] = i;
+                int tokenClass;
+                int tokenLength = MatchToken(buffer, i, length, out tokenClass);
+                TokensClasses[tokensCount] = tokenClass;
 
-			AcceptingStates.Add(state);
-			int tokenClass = (desiredClass != -1) ? desiredClass : ClassIdProvider.GetNext();
-			StateToTokenID[state] = tokenClass;
+                i += tokenLength;
 
-			return new KeyValuePair<int, int>(state, tokenClass);
-		}
+                tokensCount++;
+            }
 
-		private int IntegrateToken(byte[] tokenBytes)
-		{
-			var oldBranchCurState = INITIAL_STATE;
-			var newBranchCurState = INITIAL_STATE;
+            return tokensCount - 1; // returns index of last token
+        }
 
-			oldBranchCurState = TransitionsTable[oldBranchCurState][tokenBytes[0]];
-			newBranchCurState = CreateAndInitNewState(newBranchCurState, tokenBytes[0]);
-			
-			for (int i = 1; i < tokenBytes.Length; i++)
-			{
-				if (oldBranchCurState != WRONG_STATE)
-				{
-					TransitionsTable[newBranchCurState] = (int[])TransitionsTable[oldBranchCurState].Clone();
+        #endregion
 
-					if (AcceptingStates.Contains(oldBranchCurState))
-					{
-						AcceptingStates.Add(newBranchCurState);
-						StateToTokenID[newBranchCurState] = StateToTokenID[oldBranchCurState];
-					}
-					oldBranchCurState = TransitionsTable[oldBranchCurState][tokenBytes[i]];
-				}
-				newBranchCurState = CreateAndInitNewState(newBranchCurState, tokenBytes[i]);
-			}
+        public Terminal AddToken(string tokenString)
+        {
+            return new Terminal(tokenString, AddToken(tokenString, -1).Value);
+        }
 
-			if (oldBranchCurState != WRONG_STATE)
-				TransitionsTable[newBranchCurState] = (int[])TransitionsTable[oldBranchCurState].Clone();
+        private KeyValuePair<int, int> AddToken(string tokenString, int desiredClass)
+        {
+            if (String.IsNullOrEmpty(tokenString)) throw new ArgumentNullException("tokenString");
 
-			return newBranchCurState;
-		}
+            int state = IntegrateToken(Encoding.ASCII.GetBytes(tokenString));
 
-		internal Terminal AddTokens(params string[] tokenStrings)
-		{
-			if (tokenStrings.Length == 0) return null;
+            AcceptingStates.Add(state);
+            int tokenClass = (desiredClass != -1) ? desiredClass : ClassIdProvider.GetNext();
+            StateToTokenID[state] = tokenClass;
 
-			int tokenClass = AddToken(tokenStrings[0]).TokenClassID;
-			for (int i = 1; i < tokenStrings.Length; i++)
-				AddToken(tokenStrings[i], tokenClass);
+            return new KeyValuePair<int, int>(state, tokenClass);
+        }
 
-			return new Terminal(tokenStrings[0], tokenClass);
-		}
+        private int IntegrateToken(byte[] tokenBytes)
+        {
+            int oldBranchCurState = INITIAL_STATE;
+            int newBranchCurState = INITIAL_STATE;
+
+            oldBranchCurState = TransitionsTable[oldBranchCurState][tokenBytes[0]];
+            newBranchCurState = CreateAndInitNewState(newBranchCurState, tokenBytes[0]);
+
+            for (int i = 1; i < tokenBytes.Length; i++)
+            {
+                if (oldBranchCurState != WRONG_STATE)
+                {
+                    TransitionsTable[newBranchCurState] = (int[]) TransitionsTable[oldBranchCurState].Clone();
+
+                    if (AcceptingStates.Contains(oldBranchCurState))
+                    {
+                        AcceptingStates.Add(newBranchCurState);
+                        StateToTokenID[newBranchCurState] = StateToTokenID[oldBranchCurState];
+                    }
+                    oldBranchCurState = TransitionsTable[oldBranchCurState][tokenBytes[i]];
+                }
+                newBranchCurState = CreateAndInitNewState(newBranchCurState, tokenBytes[i]);
+            }
+
+            if (oldBranchCurState != WRONG_STATE)
+                TransitionsTable[newBranchCurState] = (int[]) TransitionsTable[oldBranchCurState].Clone();
+
+            return newBranchCurState;
+        }
+
+        internal Terminal AddTokens(params string[] tokenStrings)
+        {
+            if (tokenStrings.Length == 0) return null;
+
+            int tokenClass = AddToken(tokenStrings[0]).TokenClassID;
+            for (int i = 1; i < tokenStrings.Length; i++)
+                AddToken(tokenStrings[i], tokenClass);
+
+            return new Terminal(tokenStrings[0], tokenClass);
+        }
 
         /*
 		public void AddCommentWithBordersToken(string startToken, string endToken)
@@ -298,14 +334,15 @@ namespace Scopus.LexicalAnalysis
 		}
 		*/
 
-		/// <summary>
-		/// Hides token, preventing tokenizer to supply it to parser.
-		/// </summary>
-		/// <param name="term">Terminal symbol of previously added token.</param>
-		public void HideToken(Terminal term)
-		{
-			HiddenTokens.Add(term.TokenClassID);
-		}
+        /// <summary>
+        /// Hides token, preventing tokenizer to supply it to parser.
+        /// </summary>
+        /// <param name="term">Terminal symbol of previously added token.</param>
+        public void HideToken(Terminal term)
+        {
+            HiddenTokens.Add(term.TokenClassID);
+        }
+
 /*		
 		protected virtual void InitIntegerNumberToken()
 		{
@@ -340,21 +377,23 @@ namespace Scopus.LexicalAnalysis
 			}
 		}
  * */
-		protected virtual void InitEndlineToken()
-		{
-			if (EndlineValue == null)
-			{
-				EndlineStateValue = CreateNewState();
-				TransitionsTable[INITIAL_STATE][ASCII_LF] = EndlineStateValue;
-				TransitionsTable[INITIAL_STATE][ASCII_CR] = EndlineStateValue;
-				TransitionsTable[EndlineStateValue][ASCII_LF] = EndlineStateValue;
-				TransitionsTable[EndlineStateValue][ASCII_CR] = EndlineStateValue;
-				
-				AcceptingStates.Add(EndlineStateValue);
-				StateToTokenID[EndlineStateValue] = ClassIdProvider.GetNext();
-				EndlineValue = new Terminal(Lexer.END_LINE_TOKEN_NAME, ClassIdProvider.GetCurrent());
-			}
-		}
+
+        protected virtual void InitEndlineToken()
+        {
+            if (EndlineValue == null)
+            {
+                EndlineStateValue = CreateNewState();
+                TransitionsTable[INITIAL_STATE][ASCII_LF] = EndlineStateValue;
+                TransitionsTable[INITIAL_STATE][ASCII_CR] = EndlineStateValue;
+                TransitionsTable[EndlineStateValue][ASCII_LF] = EndlineStateValue;
+                TransitionsTable[EndlineStateValue][ASCII_CR] = EndlineStateValue;
+
+                AcceptingStates.Add(EndlineStateValue);
+                StateToTokenID[EndlineStateValue] = ClassIdProvider.GetNext();
+                EndlineValue = new Terminal(Lexer.END_LINE_TOKEN_NAME, ClassIdProvider.GetCurrent());
+            }
+        }
+
         /*
 		protected virtual void InitStringIdentifierToken()
 		{
@@ -385,38 +424,20 @@ namespace Scopus.LexicalAnalysis
 		}
         */
 
-		public int Tokenize(byte[] buffer, int offset, int length)
-        {
-            int tokensCount = 0;
-
-            for (int i = offset; i < offset + length;)
-            {
-                TokensIndices[tokensCount] = i;
-                int tokenClass;
-                int tokenLength = MatchToken(buffer, i, length, out tokenClass);
-                TokensClasses[tokensCount] = tokenClass;
-
-                i += tokenLength;
-
-                tokensCount++;
-            }
-
-            return tokensCount - 1;	// returns index of last token
-        }
         private int MatchToken(byte[] buffer, int offset, int length, out int tokenClass)
         {
-            var state = INITIAL_STATE;
+            int state = INITIAL_STATE;
             int i;
             tokenClass = -1;
 
             for (i = offset; i < length; i++)
             {
-                var previousState = state;
-				state = TransitionsTable[state][buffer[i]];
+                int previousState = state;
+                state = TransitionsTable[state][buffer[i]];
 
                 if (state == WRONG_STATE)
                 {
-					if (AcceptingStates.Contains(previousState))
+                    if (AcceptingStates.Contains(previousState))
                     {
                         tokenClass = StateToTokenID[previousState];
                         break;
@@ -426,37 +447,39 @@ namespace Scopus.LexicalAnalysis
             }
 
             // in case end of buffer was reached, checking whether it ends with a valid token
-			if (i == length && AcceptingStates.Contains(state))
+            if (i == length && AcceptingStates.Contains(state))
                 tokenClass = StateToTokenID[state];
 
-            return i - offset;	// returns length of token
+            return i - offset; // returns length of token
         }
 
-		protected int CreateNewState()
-		{
-			var arr = new int[CHARS_COUNT];
-			for (int b = 0; b < CHARS_COUNT; b++)
-				arr[b] = WRONG_STATE;
-			TransitionsTable.Add(arr);
+        protected int CreateNewState()
+        {
+            var arr = new int[CHARS_COUNT];
+            for (int b = 0; b < CHARS_COUNT; b++)
+                arr[b] = WRONG_STATE;
+            TransitionsTable.Add(arr);
 
-			return StateIdProvider.GetNext();
-		}
-		protected int CreateAndInitNewState(int curState, int characterCode)
-		{
-			// this operation is dangerous to write in one line, because CreateNewState() changes the size of the table
-			int newState = CreateNewState();
-			TransitionsTable[curState][characterCode] = newState;
+            return StateIdProvider.GetNext();
+        }
 
-			return newState;
-		}
-		protected int CheckCreateState(int characterCode, int curState)
-		{
-			// automatically checks whether the state already exists, that accepts transition from curState by characterCode.
-			int toState = TransitionsTable[curState][characterCode];
-			if (toState != WRONG_STATE)
-				return toState;
+        protected int CreateAndInitNewState(int curState, int characterCode)
+        {
+            // this operation is dangerous to write in one line, because CreateNewState() changes the size of the table
+            int newState = CreateNewState();
+            TransitionsTable[curState][characterCode] = newState;
 
-			return CreateAndInitNewState(curState, characterCode);
-		}
-	}
+            return newState;
+        }
+
+        protected int CheckCreateState(int characterCode, int curState)
+        {
+            // automatically checks whether the state already exists, that accepts transition from curState by characterCode.
+            int toState = TransitionsTable[curState][characterCode];
+            if (toState != WRONG_STATE)
+                return toState;
+
+            return CreateAndInitNewState(curState, characterCode);
+        }
+    }
 }

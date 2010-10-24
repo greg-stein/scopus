@@ -2,17 +2,18 @@
 {
     internal class RepetitionRegExp : RegExp
     {
-        internal RegExp ExpressionToRepeat { get; set; }
-
         internal RepetitionRegExp(RegExp expression)
         {
             ExpressionToRepeat = expression;
+            ChildExpressions = new[] {expression};
         }
+
+        internal RegExp ExpressionToRepeat { get; set; }
 
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("RepetitionRegExpNFA");
-            var innerExpNFA = ExpressionToRepeat.AsNFA();
+            FiniteAutomata innerExpNFA = ExpressionToRepeat.AsNFA();
 
             nfa.StartState.AddTransitionTo(innerExpNFA.StartState, InputChar.Epsilon());
             nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.Epsilon());

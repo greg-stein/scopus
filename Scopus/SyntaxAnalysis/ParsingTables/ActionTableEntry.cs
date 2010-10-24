@@ -1,8 +1,8 @@
 ﻿namespace Scopus.SyntaxAnalysis.ParsingTables
 {
-	internal struct ActionTableEntry
-	{
-		internal ParserAction Action;
-		internal int Destination;
-	}
+    internal struct ActionTableEntry
+    {
+        internal ParserAction Action;
+        internal int Destination;
+    }
 }

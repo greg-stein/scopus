@@ -6,13 +6,23 @@ namespace Scopus.LexicalAnalysis
 {
     public class TokensCollection : ICollection<Token>
     {
-		internal byte[] LexemesBuffer { get; private set; }
+        private readonly ILexer mLexer;
+
+        public TokensCollection(ILexer lexer)
+        {
+            mLexer = lexer;
+
+            TokensIndices = lexer.TokensIndices;
+            TokensClasses = lexer.TokensClasses;
+
+            RetrieveTokens();
+        }
+
+        internal byte[] LexemesBuffer { get; private set; }
         internal int[] TokensIndices { get; private set; }
         internal int[] TokensClasses { get; private set; }
 
-		private readonly ILexer mLexer;
-
-        #region ICollection<Lexeme> Members
+        #region ICollection<Token> Members
 
         public void Add(Token item)
         {
@@ -38,32 +48,21 @@ namespace Scopus.LexicalAnalysis
 
         public void CopyTo(Token[] array, int arrayIndex)
         {
-            foreach (var lexeme in this)
-                array[arrayIndex++] = (Token)lexeme.Clone();
+            foreach (Token lexeme in this)
+                array[arrayIndex++] = (Token) lexeme.Clone();
         }
 
-        public int Count
-        {
-            get; private set;
-        }
+        public int Count { get; private set; }
 
         public bool IsReadOnly
         {
             get { return true; }
         }
 
-        #endregion
-
-        #region IEnumerable<Lexeme> Members
-
         public IEnumerator<Token> GetEnumerator()
         {
             return new TokensEnumerator(this);
         }
-
-        #endregion
-
-        #region IEnumerable Members
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -71,16 +70,6 @@ namespace Scopus.LexicalAnalysis
         }
 
         #endregion
-
-        public TokensCollection(ILexer lexer)
-        {
-            mLexer = lexer;
-
-            TokensIndices = lexer.TokensIndices;
-            TokensClasses = lexer.TokensClasses;
-
-            RetrieveTokens();
-        }
 
         public bool RetrieveTokens()
         {
@@ -93,5 +82,5 @@ namespace Scopus.LexicalAnalysis
 
             return false;
         }
-	}
+    }
 }

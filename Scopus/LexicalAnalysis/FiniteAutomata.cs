@@ -4,11 +4,6 @@ namespace Scopus.LexicalAnalysis
 {
     public class FiniteAutomata
     {
-        internal string Name { get; private set; }
-
-        internal State StartState { get; set; }
-        internal State Terminator { get; set; }
-
         internal FiniteAutomata(string name, bool createMarginalStates)
         {
             if (createMarginalStates)
@@ -22,11 +17,18 @@ namespace Scopus.LexicalAnalysis
 
         internal FiniteAutomata()
             : this("Default", true)
-        {}
+        {
+        }
 
         internal FiniteAutomata(string name)
-            :this(name, true)
-        {}
+            : this(name, true)
+        {
+        }
+
+        internal string Name { get; private set; }
+
+        internal State StartState { get; set; }
+        internal State Terminator { get; set; }
 
         internal HashSet<State> GetStates()
         {
@@ -36,12 +38,12 @@ namespace Scopus.LexicalAnalysis
 
             while (queue.Count > 0)
             {
-                var s = queue.Dequeue();
+                State s = queue.Dequeue();
                 foreach (var transition in s.Transitions)
                 {
-                    foreach (var state in transition.Value)
+                    foreach (State state in transition.Value)
                     {
-                        queue.Enqueue(state);
+                       if (!states.Contains(s)) queue.Enqueue(state);
                     }
                 }
 

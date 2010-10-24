@@ -2,21 +2,30 @@
 using System.Collections.Generic;
 using System.Linq;
 
-
 namespace Scopus.SyntaxAnalysis
 {
     public class Production : GrammarEntity, IEquatable<Production>
     {
-		internal const string ARROW = "-->";
+        internal const string ARROW = "-->";
 
-		internal int ID { get; set; }
-		
-		internal NonTerminal Symbol { get; private set; }
-		internal List<GrammarEntity> Expression = new List<GrammarEntity>();
-		internal Action<TerminalValues> SemanticAction;
+        internal List<GrammarEntity> Expression = new List<GrammarEntity>();
+        internal Action<TerminalValues> SemanticAction;
 
-		private bool mExpressionChanged = true;
-		private int mTerminalsCount;
+        private bool mExpressionChanged = true;
+        private int mTerminalsCount;
+
+
+        public Production(NonTerminal symbol, GrammarEntity expression, Action<TerminalValues> action)
+            : base(symbol.ToString())
+        {
+            Symbol = symbol;
+            Expression = new List<GrammarEntity> {expression};
+            SemanticAction = action;
+        }
+
+        internal int ID { get; set; }
+
+        internal NonTerminal Symbol { get; private set; }
 
         internal int TerminalsCount
         {
@@ -24,7 +33,7 @@ namespace Scopus.SyntaxAnalysis
             {
                 if (mExpressionChanged)
                 {
-					mTerminalsCount = Expression.Where(entity => entity is Terminal).Count();
+                    mTerminalsCount = Expression.Where(entity => entity is Terminal).Count();
                     mExpressionChanged = false;
                 }
 
@@ -32,13 +41,21 @@ namespace Scopus.SyntaxAnalysis
             }
         }
 
+        #region IEquatable<Production> Members
 
-		public Production(NonTerminal symbol, GrammarEntity expression, Action<TerminalValues> action) : base(symbol.ToString())
-		{
-			Symbol = symbol;
-			Expression = new List<GrammarEntity> { expression };
-			SemanticAction = action;
-		}
+        public bool Equals(Production other)
+        {
+            if (other.Symbol != Symbol) return false;
+            if (other.Expression.Count != Expression.Count) return false;
+            for (int i = 0; i < Expression.Count; i++)
+                // !!! implement correctly throughout the grammar entities
+                if (!other.Expression[i].Equals(Expression[i]))
+                    return false;
+
+            return true;
+        }
+
+        #endregion
 
         public override bool Equals(object obj)
         {
@@ -50,18 +67,6 @@ namespace Scopus.SyntaxAnalysis
             return false;
         }
 
-        public bool Equals(Production other)
-        {
-            if (other.Symbol != Symbol) return false;
-            if (other.Expression.Count != Expression.Count) return false;
-            for (int i = 0; i < Expression.Count; i++)
-                // !!! implement correctly throughout the grammar entities
-				if (!other.Expression[i].Equals(Expression[i]))
-					return false;
-
-            return true;
-        }
-
         public override int GetHashCode()
         {
             return Symbol.GetHashCode() ^ Expression.GetHashCode();
@@ -69,9 +74,9 @@ namespace Scopus.SyntaxAnalysis
 
         public override string ToString()
         {
-            var value = Symbol + " " + ARROW;
+            string value = Symbol + " " + ARROW;
 
-            foreach (var entity in Expression)
+            foreach (GrammarEntity entity in Expression)
             {
                 value += string.Format(" {0}", entity);
             }
@@ -81,20 +86,21 @@ namespace Scopus.SyntaxAnalysis
 
         public static Production operator &(Production production, GrammarEntity entity)
         {
-			production.mExpressionChanged = true;
-			production.Expression.Add(entity);
-        	return production;
+            production.mExpressionChanged = true;
+            production.Expression.Add(entity);
+            return production;
         }
-		public static Production operator ^(Production p, Action<TerminalValues> action)
-		{
-			p.SemanticAction = action;
-			return p;
-		}
 
-		public void PerformSemanticAction(TerminalValues values)
-		{
-			if (SemanticAction != null)
-				SemanticAction(values);
-		}
-	}
+        public static Production operator ^(Production p, Action<TerminalValues> action)
+        {
+            p.SemanticAction = action;
+            return p;
+        }
+
+        public void PerformSemanticAction(TerminalValues values)
+        {
+            if (SemanticAction != null)
+                SemanticAction(values);
+        }
+    }
 }

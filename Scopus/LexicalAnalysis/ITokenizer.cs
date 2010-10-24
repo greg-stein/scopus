@@ -1,7 +1,7 @@
-﻿using Scopus.LexicalAnalysis.Algorithms;
+﻿using System.Text;
+using Scopus.LexicalAnalysis.Algorithms;
 using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
-
 
 namespace Scopus.LexicalAnalysis
 {
@@ -9,25 +9,30 @@ namespace Scopus.LexicalAnalysis
     /// Represents tokenizer that is used by Lexer in Lexical Analysis phase.
     /// </summary>
     public interface ITokenizer
-    {		
-		// todo: should be removed!!!
-		/// <summary>
+    {
+        // todo: should be removed!!!
+        /// <summary>
         /// Gets or sets array containing tokens' indices.
         /// </summary>
         int[] TokensIndices { get; set; }
 
-		// todo: should be removed!!!
-		/// <summary>
+        // todo: should be removed!!!
+        /// <summary>
         /// Gets or sets array containing tokens' classes (types).
         /// </summary>
         int[] TokensClasses { get; set; }
 
         /// <summary>
+        /// Returns total tokens count added to tokenizer.
+        /// </summary>
+        int TotalTokensCount { get; }
+
+        /// <summary>
         /// Sets transition function implementation to use. Transition function supports pattern matching, for
         /// example - simulates deterministic finite automata implemented as adjacent table.
         /// </summary>
-        /// <param name="transitionFunction">Specific implementation of transition function</param>
-        void SetTransitionFunction(ITransitionFunction transitionFunction);
+        /// <param name="function">Specific implementation of transition function</param>
+        void SetTransitionFunction(ITransitionFunction function);
 
         /// <summary>
         /// Tells tokenizer to recognize given pattern as terminal and pass it to Parser
@@ -49,12 +54,19 @@ namespace Scopus.LexicalAnalysis
         /// <returns>Special terminal symbol representing epsiilon (empty word)</returns>
         Terminal UseEpsilon();
 
-		/// <summary>
-		/// Returns total tokens count added to tokenizer.
-		/// </summary>
-		int TotalTokensCount { get; }
-		
-		/// <summary>
+        /// <summary>
+        /// Sets encoding. No default value is defined, hence calling this method before tokenizing is mandatory.
+        /// </summary>
+        /// <param name="encoding">Encoding for tokenizing</param>
+        void SetEncoding(Encoding encoding);
+
+        /// <summary>
+        /// Builds transition using previously set transition function. If no transition function is set, this method
+        /// should throw an exception.
+        /// </summary>
+        void BuildTransitions();
+
+        /// <summary>
         /// Tokenizes chunk of byte array with given offset and length. Stores tokens information in
         /// TokenIndices and TokenClasses arrays and returns index of last recognized token.
         /// </summary>

@@ -1,10 +1,32 @@
-﻿namespace Scopus.LexicalAnalysis.RegularExpressions
+﻿using System.Text;
+
+namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     /// <summary>
     /// Used for building regular expressions
     /// </summary>
     public abstract class RegExp
     {
+        private Encoding mEncoding = Encoding.ASCII;
+
+        /// <summary>
+        /// Holds all child regular expressions
+        /// </summary>
+        protected RegExp[] ChildExpressions { get; set; }
+
+        /// <summary>
+        /// Encoding that used for translating LiteralRegExp into NFA.
+        /// </summary>
+        protected internal Encoding Encoding
+        {
+            get { return mEncoding; }
+            set
+            {
+                mEncoding = value;
+                SetChildEncodingToParental();
+            }
+        }
+
         /// <summary>
         /// Builds sequence regular expression, i.e. 'a','b' --> 'ab'
         /// </summary>
@@ -83,9 +105,24 @@
         /// <returns>Non-determenistic Finite Automaton for the regular expression</returns>
         internal FiniteAutomata AsNFA(bool markTerminatorAsAcceptingState)
         {
-            var nfa = AsNFA();
+            FiniteAutomata nfa = AsNFA();
             nfa.Terminator.IsAccepting = markTerminatorAsAcceptingState;
             return nfa;
+        }
+
+        /// <summary>
+        /// Sets child encoding to be as parental encoding.
+        /// </summary>
+        /// <param name="regExps"></param>
+        protected void SetChildEncodingToParental()
+        {
+            if (ChildExpressions == null) return;
+
+            foreach (RegExp regExp in ChildExpressions)
+            {
+                regExp.Encoding = Encoding;
+                regExp.SetChildEncodingToParental();
+            }
         }
     }
 }

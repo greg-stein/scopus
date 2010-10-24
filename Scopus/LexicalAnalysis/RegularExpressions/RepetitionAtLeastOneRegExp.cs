@@ -9,8 +9,8 @@
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("RepetitionAtLeastOneRegExpNFA");
-            var innerExpNFA = ExpressionToRepeat.AsNFA();
-            var innerExpNFA2 = ExpressionToRepeat.AsNFA();
+            FiniteAutomata innerExpNFA = ExpressionToRepeat.AsNFA();
+            FiniteAutomata innerExpNFA2 = ExpressionToRepeat.AsNFA();
 
             nfa.StartState.AddTransitionTo(innerExpNFA.StartState, InputChar.Epsilon());
             innerExpNFA.Terminator.AddTransitionTo(innerExpNFA2.StartState, InputChar.Epsilon());

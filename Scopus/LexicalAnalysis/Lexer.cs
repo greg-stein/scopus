@@ -1,29 +1,54 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace Scopus.LexicalAnalysis
 {
     public class Lexer : ILexer, IDisposable
     {
         public const string END_LINE_TOKEN_NAME = "<endln>";
-		public const string INTEGER_NUMBER_TOKEN_NAME = "int_id";
-		public const string FLOAT_NUMBER_TOKEN_NAME = "float_id";
-		public const string STRING_CONSTANT_TOKEN_NAME = "string_const";
-		public const string STRING_IDENTIFIER_TOKEN_NAME = "id";
-		
-		private const int PAGE_SIZE = 4096; // as of Windows XP
-        private const int DEFAULT_BUFFER_SIZE = 64 * PAGE_SIZE;
-        private const int DEFAULT_LEXEME_BUFFER_SIZE = PAGE_SIZE;
 
-        private BufferedStream mDataSource;
-        private int mReadLength;
+        private const int PAGE_SIZE = 4096; // as of Windows XP
+        private const int DEFAULT_BUFFER_SIZE = 64*PAGE_SIZE;
+        private const int DEFAULT_LEXEME_BUFFER_SIZE = PAGE_SIZE;
+        private Encoding encoding = Encoding.ASCII;
+
         private bool mBufferIsFull;
+        private BufferedStream mDataSource;
         private int mLastLexemePos;
+        private int mReadLength;
         private ITokenizer mTokenizer;
+
+        public Lexer(ITokenizer tokenizer)
+        {
+            BufferSize = DEFAULT_LEXEME_BUFFER_SIZE;
+            AllocateBuffers();
+            Tokenizer = tokenizer;
+        }
+
+        public Lexer(ITokenizer tokenizer, int bufferSize)
+        {
+            BufferSize = bufferSize;
+            AllocateBuffers();
+            Tokenizer = tokenizer;
+        }
+
+        public Lexer(Stream stream, ITokenizer tokenizer) : this(tokenizer)
+        {
+            SetDataSource(stream);
+        }
+
+        public Lexer(Stream stream, ITokenizer tokenizer, int bufferSize) : this(tokenizer, bufferSize)
+        {
+            SetDataSource(stream);
+        }
+
+        public int BufferSize { get; private set; }
+
+        #region ILexer Members
 
         public int LastTokenStartIndex { get; private set; }
         public byte[] Buffer { get; private set; }
-        public int BufferSize { get; private set; }
         public int[] TokensIndices { get; private set; }
         public int[] TokensClasses { get; private set; }
 
@@ -35,67 +60,22 @@ namespace Scopus.LexicalAnalysis
                 mTokenizer = value;
                 mTokenizer.TokensClasses = TokensClasses;
                 mTokenizer.TokensIndices = TokensIndices;
+                mTokenizer.SetEncoding(encoding);
             }
         }
+
         public TokensCollection TokensStream
         {
             get { return new TokensCollection(this); }
         }
 
-        public Lexer(ITokenizer tokenizer)
+        public void SetEncoding(Encoding encoding)
         {
-            BufferSize = DEFAULT_LEXEME_BUFFER_SIZE;
-            AllocateBuffers();
-            Tokenizer = tokenizer;
-        }
-        public Lexer(ITokenizer tokenizer, int bufferSize)
-        {
-            BufferSize = bufferSize;
-            AllocateBuffers();
-            Tokenizer = tokenizer;
-        }
-        public Lexer(Stream stream, ITokenizer tokenizer) : this(tokenizer)
-        {
-            SetDataSource(stream);
-        }
-        public Lexer(Stream stream, ITokenizer tokenizer, int bufferSize) : this(tokenizer, bufferSize)
-        {
-            SetDataSource(stream);
+            this.encoding = encoding;
+            if (Tokenizer != null) Tokenizer.SetEncoding(encoding);
         }
 
-        private void AllocateBuffers()
-        {
-            Buffer = new byte[BufferSize];
-            TokensIndices = new int[BufferSize + 1]; // 1 for setting last non existing lexeme index
-            TokensClasses = new int[BufferSize];
-        }
-
-		#region IDisposable members
-
-		~Lexer()
-		{
-			Dispose(false);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				// dispose managed resources
-				mDataSource.Dispose();
-			}
-			// free native resources
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		#endregion
-		
-		public void SetDataSource(Stream stream)
+        public void SetDataSource(Stream stream)
         {
             LastTokenStartIndex = 0;
             mDataSource = new BufferedStream(stream, DEFAULT_BUFFER_SIZE);
@@ -121,6 +101,15 @@ namespace Scopus.LexicalAnalysis
                 TokensIndices[LastTokenStartIndex + 1] = mReadLength;
             }
             return true;
+        }
+
+        #endregion
+
+        private void AllocateBuffers()
+        {
+            Buffer = new byte[BufferSize];
+            TokensIndices = new int[BufferSize + 1]; // 1 for setting last non existing lexeme index
+            TokensClasses = new int[BufferSize];
         }
 
         /// <summary>
@@ -154,6 +143,31 @@ namespace Scopus.LexicalAnalysis
 
             mReadLength += analyzedLexemeLength;
             return true;
-		}
-	}
+        }
+
+        #region IDisposable members
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~Lexer()
+        {
+            Dispose(false);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // dispose managed resources
+                mDataSource.Dispose();
+            }
+            // free native resources
+        }
+
+        #endregion
+    }
 }

@@ -4,8 +4,15 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
 {
     internal class Item : IEquatable<Item>
     {
+        internal Item(Production p, int dotPosition)
+        {
+            Production = p;
+            DotPosition = dotPosition;
+        }
+
         internal Production Production { get; private set; }
         internal int DotPosition { get; private set; }
+
         internal GrammarEntity NextToDotSymbol
         {
             get
@@ -18,16 +25,23 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
             }
         }
 
-        internal Item(Production p, int dotPosition)
+        #region IEquatable<Item> Members
+
+        public bool Equals(Item other)
         {
-            Production = p;
-            DotPosition = dotPosition;
+            if (!other.Production.Equals(Production)) return false;
+            if (other.DotPosition != DotPosition) return false;
+
+            return true;
         }
+
+        #endregion
 
         public override int GetHashCode()
         {
             return ToString().GetHashCode();
         }
+
         public override bool Equals(object obj)
         {
             if (obj == null) return base.Equals(obj);
@@ -37,22 +51,16 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
 
             return false;
         }
-        public bool Equals(Item other)
-        {
-            if (!other.Production.Equals(Production)) return false;
-            if (other.DotPosition != DotPosition) return false;
 
-            return true;
-        }
         public override string ToString()
         {
-            var production = Production.ToString();
+            string production = Production.ToString();
             // "A --> ".Length() :
-            var dotIndex = Production.Symbol.ToString().Length + Production.ARROW.Length + 2; // two spaces
+            int dotIndex = Production.Symbol.ToString().Length + Production.ARROW.Length + 2; // two spaces
 
             for (int i = 0; i < DotPosition; i++)
             {
-                var entity = Production.Expression[i];
+                GrammarEntity entity = Production.Expression[i];
                 dotIndex += entity.ToString().Length + 1; // plus one space
             }
 
