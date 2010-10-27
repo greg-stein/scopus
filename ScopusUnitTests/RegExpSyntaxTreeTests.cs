@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
 using Scopus.LexicalAnalysis.Algorithms;
@@ -62,6 +63,39 @@ namespace ScopusUnitTests
 
             Assert.That(nfa.StartState.Transitions[InputChar.For((byte) LITERAL)], 
                 Is.EquivalentTo(new List<State> {nfa.Terminator}));
+        }
+
+        [Test]
+        public void LiteralStringRegExpNFAConstructionTest()
+        {
+            const string LITERAL = "abcdef";
+
+            var regExp = RegExp.Literal(LITERAL);
+            var nfa = regExp.AsNFA(true);
+
+            var terminator = Simulate(nfa.StartState,
+                (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f');
+
+            Assert.That(terminator, Is.EqualTo(nfa.Terminator));
+            Assert.That(terminator.IsAccepting);
+        }
+
+        [Test]
+        public void UnicodeStringNFAConstructionTest()
+        {
+            const string LITERAL = "abcdef";
+
+            var regExp = RegExp.Literal(LITERAL);
+            regExp.Encoding = Encoding.Unicode;
+
+            var nfa = regExp.AsNFA(true);
+
+            var charCodes = Encoding.Unicode.GetBytes(LITERAL);
+            var terminator = Simulate(nfa.StartState, charCodes[0], charCodes[1], charCodes[2], charCodes[3], charCodes[4], charCodes[5], 
+                charCodes[6], charCodes[7], charCodes[8], charCodes[9], charCodes[10], charCodes[11]);
+
+            Assert.That(terminator, Is.EqualTo(nfa.Terminator));
+            Assert.That(terminator.IsAccepting);
         }
 
         [Test]

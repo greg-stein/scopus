@@ -1,4 +1,6 @@
-﻿namespace Scopus.LexicalAnalysis.RegularExpressions
+﻿using System.Text;
+
+namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     /// <summary>
     /// Represents literal regular expression for single character.
@@ -15,7 +17,40 @@
             Literals = Encoding.GetBytes(literals);
         }
 
+        internal LiteralRegExp(char literal, Encoding encoding)
+        {
+            Literals = Encoding.GetBytes(new[] { literal });
+            this.Encoding = encoding;
+        }
+
+        internal LiteralRegExp(string literals, Encoding encoding)
+        {
+            this.Encoding = encoding;
+            Literals = Encoding.GetBytes(literals);
+        }
+
         private byte[] Literals { get; set; }
+
+        protected internal override System.Text.Encoding Encoding
+        {
+            get
+            {
+                return base.Encoding;
+            }
+            set
+            {
+                if (Literals != null)
+                {
+                    var literalsStr = Encoding.GetString(Literals); // Decode using old encoding
+                    base.Encoding = value;
+                    Literals = Encoding.GetBytes(literalsStr); // Encode using new encoding
+                }
+                else
+                {
+                    base.Encoding = value;
+                }
+            }
+        }
 
         internal override FiniteAutomata AsNFA()
         {

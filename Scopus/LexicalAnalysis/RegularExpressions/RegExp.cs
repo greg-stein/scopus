@@ -17,7 +17,7 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         /// <summary>
         /// Encoding that used for translating LiteralRegExp into NFA.
         /// </summary>
-        protected internal Encoding Encoding
+        protected internal virtual Encoding Encoding
         {
             get { return mEncoding; }
             set
@@ -77,6 +77,11 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             return new RepetitionAtLeastOneRegExp(regExp);
         }
 
+        public static RegExp AllExcept(params char[] exceptees)
+        {
+            throw new System.NotImplementedException(); // This will fail unit test. Intended
+        }
+
         /// <summary>
         /// Builds regular expression that matches single symbol exactly: a
         /// </summary>
@@ -86,6 +91,41 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         public static RegExp Literal(char literal)
         {
             return new LiteralRegExp(literal);
+        }
+
+        /// <summary>
+        /// Builds regular expression that matches given string
+        /// </summary>
+        /// <param name="literal">word that should be recognized by regular 
+        /// expression</param>
+        /// <returns></returns>
+        public static RegExp Literal(string literal)
+        {
+            return new LiteralRegExp(literal);
+        }
+
+        /// <summary>
+        /// Builds regular expression that matches single symbol exactly: a
+        /// </summary>
+        /// <param name="literal">character that should be recognized by regular 
+        /// expression</param>
+        /// <param name="encoding">Encoding for given literal. Encoding is used to store given literal as byte array</param>
+        /// <returns></returns>
+        public static RegExp Literal(char literal, Encoding encoding)
+        {
+            return new LiteralRegExp(literal, encoding);
+        }
+
+        /// <summary>
+        /// Builds regular expression that matches given string
+        /// </summary>
+        /// <param name="literal">word that should be recognized by regular 
+        /// expression</param>
+        /// <param name="encoding">Encoding for given literal. Encoding is used to store given literal as byte array</param>
+        /// <returns></returns>
+        public static RegExp Literal(string literal, Encoding encoding)
+        {
+            return new LiteralRegExp(literal, encoding);
         }
 
         /// <summary>
