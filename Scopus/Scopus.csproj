@@ -73,6 +73,7 @@
     <Compile Include="LexicalAnalysis\RegularExpressions\AlternationRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\LiteralRegExp.cs" />
     <Compile Include="LexicalAnalysis\FiniteAutomata.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\NegationRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\OptionalRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RepetitionAtLeastOneRegExp.cs" />

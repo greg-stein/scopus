@@ -9,6 +9,9 @@ using Scopus.SyntaxAnalysis;
 
 namespace Scopus.LexicalAnalysis
 {
+    /// <summary>
+    /// TODO: Obsolete! Should be removed!
+    /// </summary>
     public class KeywordsTokenizer : ITokenizer
     {
         protected const int INITIAL_STATE = 0;

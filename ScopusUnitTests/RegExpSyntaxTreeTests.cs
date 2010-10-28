@@ -14,6 +14,9 @@ namespace ScopusUnitTests
         private const byte CODE_A = (byte)'a';
         private const byte CODE_B = (byte)'b';
         private const byte CODE_C = (byte)'c';
+        private const byte CODE_D = (byte)'d';
+        private const byte CODE_E = (byte)'e';
+        private const byte CODE_F = (byte)'f';
 
         [Test]
         public void AcceptingStatePreserveTest()
@@ -51,6 +54,30 @@ namespace ScopusUnitTests
             Assert.True(Simulate(0, dfa.StartState, str).IsAccepting);
         }
 
+        [Test]
+        public void SelfTransitionsConvertionTest()
+        {
+            // a*b?
+            var nfa = new FiniteAutomata("test", true);
+            nfa.StartState.AddTransitionTo(nfa.StartState, InputChar.For((byte)'a'));
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.For((byte)'b'));
+            nfa.StartState.AddTransitionTo(nfa.Terminator, InputChar.For((byte)'a'));
+            nfa.Terminator.IsAccepting = true;
+
+            var dfa = NFAToDFAConverter.Convert(nfa);
+
+            var state = Simulate(dfa.StartState, CODE_A, CODE_A, CODE_A);
+            Assert.That(state.IsAccepting);
+
+            state = Simulate(dfa.StartState, CODE_A, CODE_A, CODE_B);
+            Assert.That(state.IsAccepting);
+
+            state = Simulate(dfa.StartState, CODE_A);
+            Assert.That(state.IsAccepting);
+
+            state = Simulate(dfa.StartState, CODE_B);
+            Assert.That(state.IsAccepting);
+        }
 
         [Test]
         public void LiteralRegExpNFAConstructionTest()
@@ -135,7 +162,7 @@ namespace ScopusUnitTests
 
             Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
             Assert.That(Simulate(1, nfa.StartState, new byte?[] { null }), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A), null), Is.EqualTo(Simulate(nfa.StartState, null)));
+            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A), null), Is.EqualTo(Simulate(nfa.StartState, (byte?)null)));
         }
 
         [Test]
@@ -149,6 +176,55 @@ namespace ScopusUnitTests
             Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A, null, CODE_A), null), Is.EqualTo(nfa.Terminator));
         }
 
+        [Test]
+        public void NegationRegExpConstructionTest()
+        {
+            var regExp = RegExp.Not(RegExp.Literal('a'));
+            var nfa = regExp.AsNFA();
+
+            var simulatedState = Simulate(nfa.StartState, CODE_A);
+
+            Assert.That(simulatedState, Is.Not.EqualTo(nfa.Terminator));
+            Assert.IsFalse(simulatedState.IsAccepting);
+
+
+            for (int i = Byte.MinValue; i <= Byte.MaxValue; i++)
+            {
+                if (i == CODE_A) continue; // skip 'a' since we have already tested it above
+
+                simulatedState = Simulate(nfa.StartState, (byte) i);
+                Assert.That(simulatedState.IsAccepting);
+                Assert.That(simulatedState, Is.EqualTo(nfa.Terminator));
+            }
+        }
+
+        [Test]
+        public void NegationRegExpStringConstructionTest()
+        {
+            var regExp = RegExp.Not(RegExp.Literal("abcdef"));
+            var nfa = regExp.AsNFA();
+
+            var simulatedState = Simulate(nfa.StartState, CODE_A, CODE_B, CODE_C, CODE_D, CODE_E, CODE_F);
+
+            Assert.That(simulatedState, Is.Not.EqualTo(nfa.Terminator));
+            Assert.IsFalse(simulatedState.IsAccepting);
+
+
+            for (int i = Byte.MinValue; i <= Byte.MaxValue; i++)
+            {
+                simulatedState = Simulate(nfa.StartState, (byte)i);
+                Assert.That(simulatedState.IsAccepting);
+            }
+
+            string[] words = new string[] {"abcdes", "a", "xde", "abc", "abcdXefgh"}; // Decide what to do with abcdefXXX
+
+            foreach (var word in words)
+            {
+                simulatedState = Simulate(nfa.StartState, word);
+                Assert.That(simulatedState.IsAccepting);
+            }
+        }
+
         private static State Simulate(int transitionToUse, State s, params byte?[] inputChars)
         {
             if (inputChars == null)
@@ -160,7 +236,7 @@ namespace ScopusUnitTests
                 var ic = inputChar == null ? InputChar.Epsilon() : InputChar.For((byte) inputChar);
                 List<State> transitions;
                 if (!currentState.Transitions.TryGetValue(ic, out transitions))
-                    throw new Exception("Simulation: no transition for the symbol.");
+                    throw new SimulationException("Simulation: no transition for the symbol.");
 
                 if (transitions.Count > transitionToUse)
                 {
@@ -172,16 +248,35 @@ namespace ScopusUnitTests
                 }
                 else
                 {
-                    throw new Exception("Simulation: no transition for the symbol.");
+                    throw new SimulationException("Simulation: no transition for the symbol.");
                 }
             }
 
             return currentState;
         }
 
+        private class SimulationException : Exception
+        {
+            public SimulationException(string simulationNoTransitionForTheSymbol)
+            {
+            }
+        }
+
         private static State Simulate(State s, params byte?[] inputChars)
         {
             return Simulate(0, s, inputChars);
+        }
+
+        private static State Simulate(State s, string input)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(input);
+            State state = s;
+            foreach (var b in bytes)
+            {
+                state = Simulate(state, b);
+            }
+
+            return state;
         }
     }
 }

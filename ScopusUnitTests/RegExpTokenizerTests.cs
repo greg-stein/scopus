@@ -68,7 +68,8 @@ namespace ScopusUnitTests
             var whitespace = tokenizer.UseTerminal(RegExp.AtLeastOneOf(RegExp.Choice(
                 RegExp.Literal(' '), RegExp.Literal('\t'), RegExp.Literal('\n'))));
 
-            tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal('/'), RegExp.Literal('*'), RegExp.AllExcept()));
+            // "/*^(*/)*/
+            tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal('/'), RegExp.Literal('*'), RegExp.Not(RegExp.Literal("*/")), RegExp.Literal("*/")));
             tokenizer.BuildTransitions();
 
             // Number of tokens:  1  23  45  67    890123  45

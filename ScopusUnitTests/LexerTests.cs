@@ -3,6 +3,8 @@ using System.IO;
 using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
 
 namespace ScopusUnitTests
@@ -23,8 +25,13 @@ namespace ScopusUnitTests
         {
             fileName = Path.GetTempFileName();
             File.WriteAllText(fileName, SOURCE);
-            var tokenizer = new KeywordsTokenizer();
-            tokenizer.AddTokens(lexemes);
+            
+            var tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);
+            Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s)));
+            tokenizer.BuildTransitions();
+
             lexer = new Lexer(tokenizer);
             fileStream = File.OpenRead(fileName);
             lexer.SetDataSource(fileStream);

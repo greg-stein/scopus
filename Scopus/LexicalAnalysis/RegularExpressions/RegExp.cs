@@ -77,9 +77,14 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             return new RepetitionAtLeastOneRegExp(regExp);
         }
 
-        public static RegExp AllExcept(params char[] exceptees)
+        /// <summary>
+        /// Should :) return regular expression that will accept every pattern except that given in parameter.
+        /// </summary>
+        /// <param name="regExp">Regular expression represents an exception. Every other pattern will be accepted, but not this one.</param>
+        /// <returns></returns>
+        public static RegExp Not(RegExp regExp)
         {
-            throw new System.NotImplementedException(); // This will fail unit test. Intended
+            return new NegationRegExp(regExp);
         }
 
         /// <summary>

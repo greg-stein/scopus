@@ -10,12 +10,12 @@ namespace Scopus.LexicalAnalysis
 {
     public class RegExpTokenizer : ITokenizer
     {
-        private readonly FiniteAutomata allTokensNfa = new FiniteAutomata();
-        private readonly IDProvider classIdProvider = new IDProvider();
-        private readonly HashSet<int> ignoredTokens = new HashSet<int>();
+        private readonly FiniteAutomata mAllTokensNfa = new FiniteAutomata();
+        private readonly IDProvider mClassIdProvider = new IDProvider();
+        private readonly HashSet<int> mIgnoredTokens = new HashSet<int>();
         private Encoding mEncoding;
-        private int totalTokensCount;
-        private ITransitionFunction transitionFunction;
+        private int mTotalTokensCount;
+        private ITransitionFunction mTransitionFunction;
 
         #region ITokenizer Members
 
@@ -24,8 +24,8 @@ namespace Scopus.LexicalAnalysis
 
         public void SetTransitionFunction(ITransitionFunction function)
         {
-            transitionFunction = function;
-            classIdProvider.GetNext(); // skip 0, cuz it reserved for Epsilon terminal
+            mTransitionFunction = function;
+            mClassIdProvider.GetNext(); // skip 0, cuz it reserved for Epsilon terminal
         }
 
         public Terminal UseTerminal(RegExp regExp)
@@ -33,11 +33,11 @@ namespace Scopus.LexicalAnalysis
             regExp.Encoding = mEncoding;
             FiniteAutomata tokenNfa = regExp.AsNFA();
             tokenNfa.Terminator.IsAccepting = true;
-            tokenNfa.Terminator.TokenClass = classIdProvider.GetNext();
+            tokenNfa.Terminator.TokenClass = mClassIdProvider.GetNext();
 
             AddTokenToNfa(tokenNfa);
 
-            var terminal = new Terminal(tokenNfa.ToString(), classIdProvider.GetCurrent());
+            var terminal = new Terminal(tokenNfa.ToString(), mClassIdProvider.GetCurrent());
             return terminal;
         }
 
@@ -46,8 +46,8 @@ namespace Scopus.LexicalAnalysis
             ignoree.Encoding = mEncoding;
             FiniteAutomata tokenNfa = ignoree.AsNFA();
             tokenNfa.Terminator.IsAccepting = true;
-            tokenNfa.Terminator.TokenClass = classIdProvider.GetNext();
-            ignoredTokens.Add(tokenNfa.Terminator.TokenClass);
+            tokenNfa.Terminator.TokenClass = mClassIdProvider.GetNext();
+            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
 
             AddTokenToNfa(tokenNfa);
         }
@@ -59,7 +59,7 @@ namespace Scopus.LexicalAnalysis
 
         public int TotalTokensCount
         {
-            get { return totalTokensCount; }
+            get { return mTotalTokensCount; }
         }
 
         public void SetEncoding(Encoding encoding)
@@ -69,12 +69,12 @@ namespace Scopus.LexicalAnalysis
 
         public void BuildTransitions()
         {
-            if (transitionFunction == null)
+            if (mTransitionFunction == null)
                 throw new InvalidOperationException("No transition function is set. Could not build transitions.");
 
-            var dfa = NFAToDFAConverter.Convert(allTokensNfa);
+            var dfa = NFAToDFAConverter.Convert(mAllTokensNfa);
             var minimizedDfa = DFAMinimizer.Minimize(dfa);
-            transitionFunction.Init(minimizedDfa);
+            mTransitionFunction.Init(minimizedDfa);
         }
 
         public int Tokenize(byte[] buffer, int offset, int length)
@@ -85,16 +85,16 @@ namespace Scopus.LexicalAnalysis
             {
                 TokensIndices[tokensCount] = i;
                 int tokenClass;
-                int tokenLength = transitionFunction.MatchToken(buffer, i, length, out tokenClass);
+                int tokenLength = mTransitionFunction.MatchToken(buffer, i, length, out tokenClass);
                 TokensClasses[tokensCount] = tokenClass;
 
                 i += tokenLength;
 
-                if (!ignoredTokens.Contains(tokenClass))
+                if (!mIgnoredTokens.Contains(tokenClass))
                     tokensCount++;
             }
 
-            totalTokensCount += tokensCount;
+            mTotalTokensCount += tokensCount;
             return tokensCount - 1; // returns index of last token
         }
 
@@ -102,8 +102,8 @@ namespace Scopus.LexicalAnalysis
 
         private void AddTokenToNfa(FiniteAutomata regExpNfa)
         {
-            allTokensNfa.StartState.AddTransitionTo(regExpNfa.StartState, InputChar.Epsilon());
-            regExpNfa.Terminator.AddTransitionTo(allTokensNfa.Terminator, InputChar.Epsilon());
+            mAllTokensNfa.StartState.AddTransitionTo(regExpNfa.StartState, InputChar.Epsilon());
+            regExpNfa.Terminator.AddTransitionTo(mAllTokensNfa.Terminator, InputChar.Epsilon());
         }
     }
 }
