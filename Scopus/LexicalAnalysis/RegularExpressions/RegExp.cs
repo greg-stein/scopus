@@ -134,6 +134,21 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         }
 
         /// <summary>
+        /// Returns ready regular expression for parsing integer numbers.
+        /// </summary>
+        /// <returns></returns>
+        public static RegExp GetNumberRegExp()
+        {
+            var number = RegExp.AtLeastOneOf(RegExp.Choice(
+                RegExp.Literal('0'), RegExp.Literal('1'), RegExp.Literal('2'),
+                RegExp.Literal('3'), RegExp.Literal('4'), RegExp.Literal('5'),
+                RegExp.Literal('6'), RegExp.Literal('7'), RegExp.Literal('8'),
+                RegExp.Literal('9')));
+
+            return number;
+        }
+
+        /// <summary>
         /// Builds an Non-determenistic Finite Automaton that accepts language 
         /// defined by the regular expression.
         /// </summary>

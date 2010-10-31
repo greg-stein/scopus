@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
 using Scopus.SyntaxAnalysis.ParsingTables;
 
@@ -18,9 +21,8 @@ namespace ScopusUnitTests
         private Terminal mult;
         private Terminal leftBrace;
         private Terminal rightBrace;
-        private Terminal endMark;
 
-        private KeywordsTokenizer tokenizer;
+        private RegExpTokenizer tokenizer;
         private AugmentedGrammar grammar;
 
         public ParsingTableGenerationTests()
@@ -29,14 +31,15 @@ namespace ScopusUnitTests
             T = new NonTerminal("T");
             F = new NonTerminal("F");
 
-            tokenizer = new KeywordsTokenizer();
+            tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);            
 
-            id = tokenizer.AddToken("[0-9]+");
-            plus = tokenizer.AddToken("+");
-            mult = tokenizer.AddToken("*");
-            leftBrace = tokenizer.AddToken("(");
-            rightBrace = tokenizer.AddToken(")");
-            endMark = tokenizer.AddToken("$");
+            id = tokenizer.UseTerminal(RegExp.GetNumberRegExp());
+            plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+            mult = tokenizer.UseTerminal(RegExp.Literal('*'));
+            leftBrace = tokenizer.UseTerminal(RegExp.Literal('('));
+            rightBrace = tokenizer.UseTerminal(RegExp.Literal(')'));
 
             grammar = new AugmentedGrammar()
                               {

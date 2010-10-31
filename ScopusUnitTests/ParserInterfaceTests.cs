@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
 
 namespace ScopusUnitTests
@@ -8,6 +11,16 @@ namespace ScopusUnitTests
     [TestFixture]
     public class ParserInterfaceTests
     {
+        private ITokenizer tokenizer;
+
+        [SetUp]
+        public void InitTests()
+        {
+            tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);            
+        }
+
         [Test]
         public void GrammarEntitySequenceTest()
         {
@@ -22,14 +35,12 @@ namespace ScopusUnitTests
         [Test]
         public void GrammarEntitySequenceWithTokensTest()
         {
-            var tokenizer = new KeywordsTokenizer();
-
             NonTerminal E = new NonTerminal("E"), T = new NonTerminal("T"), F = new NonTerminal("F");
 
-            var plus = tokenizer.AddToken("+");
-            var mult = tokenizer.AddToken("*");
-            var leftBrace = tokenizer.AddToken("(");
-            var rightBrace = tokenizer.AddToken(")");
+            var plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+            var mult = tokenizer.UseTerminal(RegExp.Literal('*'));
+            var leftBrace = tokenizer.UseTerminal(RegExp.Literal('('));
+            var rightBrace = tokenizer.UseTerminal(RegExp.Literal(')'));
 
             var prod = E --> T & mult & leftBrace &  plus & rightBrace;
 
@@ -40,11 +51,10 @@ namespace ScopusUnitTests
         [Test]
         public void GrammarRecoursiveProductionTest()
         {
-            var tokenizer = new KeywordsTokenizer();
             NonTerminal E = new NonTerminal("E"), T = new NonTerminal("T"), F = new NonTerminal("F");
 
-            var plus = tokenizer.AddToken("+");
-            var mult = tokenizer.AddToken("*");
+            var plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+            var mult = tokenizer.UseTerminal(RegExp.Literal('*'));
 
             Assert.That((E --> E & F).ToString(), Is.EqualTo("E --> E F"));
             Assert.That((E --> F & E).ToString(), Is.EqualTo("E --> F E"));
@@ -58,11 +68,10 @@ namespace ScopusUnitTests
         [Test]
         public void ProductionWithSemanticActionTest()
         {
-            var tokenizer = new KeywordsTokenizer();
             NonTerminal E = new NonTerminal("E"), T = new NonTerminal("T"), F = new NonTerminal("F");
 
-            var plus = tokenizer.AddToken("+");
-            var mult = tokenizer.AddToken("*");
+            var plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+            var mult = tokenizer.UseTerminal(RegExp.Literal('*'));
 
             int testValue = 0;
 
@@ -86,19 +95,16 @@ namespace ScopusUnitTests
         [Test]
         public void ProductionWithSemanticActionComplicatedTest()
         {
-            var tokenizer = new KeywordsTokenizer();
-
             var E = new NonTerminal("E");
             var T = new NonTerminal("T");
             var F = new NonTerminal("F");
 
-            var plus = tokenizer.AddToken("+");
-            var mult = tokenizer.AddToken("*");
-            var leftBrace = tokenizer.AddToken("(");
-            var rightBrace = tokenizer.AddToken(")");
-            var endMark = tokenizer.AddToken("$");
+            var plus = tokenizer.UseTerminal(RegExp.Literal('+'));
+            var mult = tokenizer.UseTerminal(RegExp.Literal('*'));
+            var leftBrace = tokenizer.UseTerminal(RegExp.Literal('('));
+            var rightBrace = tokenizer.UseTerminal(RegExp.Literal(')'));
 
-            var kuj = 0;
+            var kuj = 0; // куй :D
 
             var prod1 = E --> E & plus & T ^ (v => kuj = 2);
             var prod2 = E --> T;

@@ -19,6 +19,7 @@ namespace ScopusUnitTests
         private string fileName;
         private Lexer lexer;
         private Stream fileStream;
+        private ITokenizer tokenizer;
 
         [SetUp]
         public void InitTests()
@@ -26,7 +27,7 @@ namespace ScopusUnitTests
             fileName = Path.GetTempFileName();
             File.WriteAllText(fileName, SOURCE);
             
-            var tokenizer = new RegExpTokenizer();
+            tokenizer = new RegExpTokenizer();
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
             tokenizer.SetEncoding(Encoding.ASCII);
             Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s)));
@@ -80,8 +81,6 @@ namespace ScopusUnitTests
         {
             const int BUFFER_SIZE = 6; // note that sample file contains 17 bytes
 
-            var tokenizer = new KeywordsTokenizer();
-            tokenizer.AddTokens(lexemes);
             lexer = new Lexer(tokenizer, BUFFER_SIZE);
             lexer.SetDataSource(fileStream);
 

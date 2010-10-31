@@ -37,7 +37,7 @@ namespace Scopus.LexicalAnalysis
 
             AddTokenToNfa(tokenNfa);
 
-            var terminal = new Terminal(tokenNfa.ToString(), mClassIdProvider.GetCurrent());
+            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
             return terminal;
         }
 

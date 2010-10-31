@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using NUnit.Framework;
 using Scopus.Exceptions;
 using Scopus.LexicalAnalysis;
@@ -262,11 +263,16 @@ namespace ScopusUnitTests
 			var L = new NonTerminal("L");
 			var R = new NonTerminal("R");
 
-            var tokenizer = new KeywordsTokenizer();
-            var id = tokenizer.AddToken("[0-9]+");
-			var assign = tokenizer.AddToken("=");
-			var deref = tokenizer.AddToken("*");
+            var tokenizer = new RegExpTokenizer();
+            tokenizer = new RegExpTokenizer();
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);            
 
+            var id = tokenizer.UseTerminal(RegExp.GetNumberRegExp());
+			var assign = tokenizer.UseTerminal(RegExp.Literal("="));
+			var deref = tokenizer.UseTerminal(RegExp.Literal("*"));
+            
+            tokenizer.BuildTransitions();
 			var grammar = new AugmentedGrammar()
                               {
 								  E --> L & assign & R,

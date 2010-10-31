@@ -1,6 +1,9 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
+using Scopus.LexicalAnalysis.Algorithms;
+using Scopus.LexicalAnalysis.RegularExpressions;
 
 namespace ScopusUnitTests
 {
@@ -18,13 +21,17 @@ namespace ScopusUnitTests
             int[] tokensIndices = new int[SOURCE.Length + 1];
             int[] tokensClasses = new int[SOURCE.Length];
 
-            var tokenizer = new KeywordsTokenizer
+            var tokenizer = new RegExpTokenizer()
                                 {
                                     TokensClasses = tokensClasses,
                                     TokensIndices = tokensIndices
                                 };
 
-            tokenizer.AddTokens(lexemes);
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);            
+            Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s)));
+            tokenizer.BuildTransitions();
+
             var lastTokenIndex = tokenizer.Tokenize(buffer, 0, SOURCE.Length);
 
             Assert.That(lastTokenIndex + 1 == lexemes.Length); // correct #tokens?
@@ -48,16 +55,21 @@ namespace ScopusUnitTests
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
 
-            var tokenizer = new KeywordsTokenizer
+            var tokenizer = new RegExpTokenizer()
                                 {
                                     TokensClasses = tokensClasses,
                                     TokensIndices = tokensIndices
                                 };
 
-            tokenizer.AddToken("aab"); // class 0
-            tokenizer.AddToken("acb"); // class 1
-            tokenizer.AddToken("abc"); // class 2
-            tokenizer.AddToken("aa");  // class 3
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);            
+
+            tokenizer.UseTerminal(RegExp.Literal("aab")); // class 1
+            tokenizer.UseTerminal(RegExp.Literal("acb")); // class 2
+            tokenizer.UseTerminal(RegExp.Literal("abc")); // class 3
+            tokenizer.UseTerminal(RegExp.Literal("aa"));  // class 4
+
+            tokenizer.BuildTransitions();
 
             var tokensNum = tokenizer.Tokenize(Encoding.ASCII.GetBytes(SAMPLE), 0, SAMPLE.Length);
             tokensNum++;
@@ -80,20 +92,25 @@ namespace ScopusUnitTests
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
 
-            var tokenizer = new KeywordsTokenizer
+            var tokenizer = new RegExpTokenizer()
             {
                 TokensClasses = tokensClasses,
                 TokensIndices = tokensIndices
             };
 
-            tokenizer.AddToken("windows");  // class: 0
-            tokenizer.AddToken(".");        // class: 1
-            tokenizer.AddToken("bugsNum");  // class: 2
-            tokenizer.AddToken("=");        // class: 3
-            tokenizer.AddToken("long");     // class: 4
-            tokenizer.AddToken("Max");      // class: 5
-            tokenizer.AddToken(";");        // class: 6
-            tokenizer.AddToken("Linux");    // class: 7
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);
+
+            tokenizer.UseTerminal(RegExp.Literal("windows"));  // class: 1
+            tokenizer.UseTerminal(RegExp.Literal("."));        // class: 2
+            tokenizer.UseTerminal(RegExp.Literal("bugsNum"));  // class: 3
+            tokenizer.UseTerminal(RegExp.Literal("="));        // class: 4
+            tokenizer.UseTerminal(RegExp.Literal("long"));     // class: 5
+            tokenizer.UseTerminal(RegExp.Literal("Max"));      // class: 6
+            tokenizer.UseTerminal(RegExp.Literal(";"));        // class: 7
+            tokenizer.UseTerminal(RegExp.Literal("Linux"));    // class: 8
+
+            tokenizer.BuildTransitions();
 
             var tokensNum = tokenizer.Tokenize(Encoding.ASCII.GetBytes(SAMPLE), 0, SAMPLE.Length) + 1;
 
@@ -128,14 +145,27 @@ namespace ScopusUnitTests
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
 
-            var tokenizer = new KeywordsTokenizer
+            var tokenizer = new RegExpTokenizer()
             {
                 TokensClasses = tokensClasses,
                 TokensIndices = tokensIndices
             };
 
-            // Classes:          0          1    2          3    4       5      6    7
-            tokenizer.AddTokens("windows", ".", "bugsNum", "=", "long", "Max", ";", "Linux");
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            tokenizer.SetEncoding(Encoding.ASCII);
+
+            tokenizer.UseTerminal(RegExp.Choice(
+                RegExp.Literal("windows"),
+                RegExp.Literal("."),
+                RegExp.Literal("bugsNum"),
+                RegExp.Literal("="), 
+                RegExp.Literal("long"),
+                RegExp.Literal("Max"),    
+                RegExp.Literal(";"),     
+                RegExp.Literal("Linux")
+            ));
+
+            tokenizer.BuildTransitions();
 
             var tokensNum = tokenizer.Tokenize(Encoding.ASCII.GetBytes(SAMPLE), 0, SAMPLE.Length) + 1;
 
@@ -159,34 +189,6 @@ namespace ScopusUnitTests
             Assert.That(tokensClasses[5] == 1);
             Assert.That(tokensClasses[6] == 1);
             Assert.That(tokensClasses[7] == 1);
-        }
-
-        [Test]
-        public void StatesArraysReallocationTest()
-        {
-            // Number of states in use > initial states number => reallocation
-            string token = new string('a', KeywordsTokenizer.INITIAL_STATES_COUNT + 1);
-            // Two consequent tokens
-            string sample = new string('a', 2 * token.Length);
-
-            var tokensClasses = new int[sample.Length];
-            var tokensIndices = new int[sample.Length];
-
-            var tokenizer = new KeywordsTokenizer
-            {
-                TokensClasses = tokensClasses,
-                TokensIndices = tokensIndices
-            };
-
-            var tokenClass = tokenizer.AddToken(token); // should be 0
-
-            var tokensNum = tokenizer.Tokenize(Encoding.ASCII.GetBytes(sample), 0, sample.Length) + 1;
-
-            Assert.That(tokensNum == 2);
-            Assert.That(tokensClasses[0] == 1);
-            Assert.That(tokensClasses[1] == 1);
-            Assert.That(tokensIndices[0] == 0);
-            Assert.That(tokensIndices[1] == token.Length);
         }
     }
 }
