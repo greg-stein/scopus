@@ -10,17 +10,22 @@ namespace Scopus.LexicalAnalysis
     /// </summary>
     public interface ITokenizer
     {
-        // todo: should be removed!!!
+        // todo: should be removed!!! CLARIFY THIS!!!!
         /// <summary>
         /// Gets or sets array containing tokens' indices.
         /// </summary>
         int[] TokensIndices { get; set; }
 
-        // todo: should be removed!!!
+        // todo: should be removed!!! THIS ALSO!!!
         /// <summary>
         /// Gets or sets array containing tokens' classes (types).
         /// </summary>
         int[] TokensClasses { get; set; }
+
+        /// <summary>
+        /// Gets or sets array containing tokens' lengths
+        /// </summary>
+        int[] TokensLengths { get; set; }
 
         /// <summary>
         /// Returns total tokens count added to tokenizer.

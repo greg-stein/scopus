@@ -31,6 +31,7 @@ namespace ScopusUnitTests
             const string input = "123 456 789 02348 0 3 452 55555";
             int[] tokenClasses = new int[input.Length];
             int[] tokenIndices = new int[input.Length];
+            int[] tokenLengths = new int[input.Length];
 
             int numClass = number.TokenClassID;
             int wsClass = whitespace.TokenClassID;
@@ -42,6 +43,7 @@ namespace ScopusUnitTests
 
             tokenizer.TokensClasses = tokenClasses;
             tokenizer.TokensIndices = tokenIndices;
+            tokenizer.TokensLengths = tokenLengths;
             int tokensNum = tokenizer.Tokenize(rawInput, 0, rawInput.Length) + 1;
 
             Assert.That(tokensNum, Is.EqualTo(expectedTokenClasses.Length));
@@ -74,24 +76,26 @@ namespace ScopusUnitTests
                 RegExp.Literal(' '), RegExp.Literal('\t'), RegExp.Literal('\n'))));
 
             // "/*^(*/)*/
-            tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal('/'), RegExp.Literal('*'), RegExp.Not(RegExp.Literal("*/")), RegExp.Literal("*/")));
+            tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal("/*"), RegExp.AnyNumberOf(RegExp.Not(RegExp.Literal("*/"))), RegExp.Literal("*/")));
             tokenizer.BuildTransitions();
 
             // Number of tokens:  1  23  45                 67
-            // Indices:           01234567890123456789012345678901
+            // Indices:           012345678901234567890123456789
             const string input = "123 456 /* Some comment */ 789";
             int[] tokenClasses = new int[input.Length];
             int[] tokenIndices = new int[input.Length];
+            int[] tokenLengths = new int[input.Length];
 
             int numClass = number.TokenClassID;
             int wsClass = whitespace.TokenClassID;
-            int[] expectedTokenClasses = new[] { numClass, wsClass, numClass, wsClass, wsClass,numClass};
-            int[] expectedTokenIndices = new[] { 0, 3, 4, 7, 8, 11, 12, 17, 18, 19, 20, 21, 22, 25, 26, 31 };
+            int[] expectedTokenClasses = new[] { numClass, wsClass, numClass, wsClass, wsClass, numClass};
+            int[] expectedTokenIndices = new[] { 0, 3, 4, 7, 26, 27 };
 
             var rawInput = Encoding.ASCII.GetBytes(input);
 
             tokenizer.TokensClasses = tokenClasses;
             tokenizer.TokensIndices = tokenIndices;
+            tokenizer.TokensLengths = tokenLengths;
             int tokensNum = tokenizer.Tokenize(rawInput, 0, rawInput.Length) + 1;
 
             Assert.That(tokensNum, Is.EqualTo(expectedTokenClasses.Length));

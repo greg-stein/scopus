@@ -162,7 +162,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         {
             Follow = new Dictionary<int, List<Terminal>>(mG.NonTerminals.Count + 1);
             Follow.Add(mG.InitialProduction.Symbol.ID,
-                       new List<Terminal>(1) {mG.UsedTerminals[Terminal.END_MARKER_TOKEN_ID]});
+                       new List<Terminal>(1) {mG.EndMarker});
             foreach (NonTerminal nTerm in mG.NonTerminals)
                 Follow.Add(nTerm.ID, new List<Terminal>());
 

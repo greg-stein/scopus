@@ -20,11 +20,13 @@ namespace ScopusUnitTests
 
             int[] tokensIndices = new int[SOURCE.Length + 1];
             int[] tokensClasses = new int[SOURCE.Length];
+            int[] tokenLengths = new int[SOURCE.Length];
 
             var tokenizer = new RegExpTokenizer()
                                 {
                                     TokensClasses = tokensClasses,
-                                    TokensIndices = tokensIndices
+                                    TokensIndices = tokensIndices,
+                                    TokensLengths = tokenLengths
                                 };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
@@ -54,11 +56,13 @@ namespace ScopusUnitTests
 
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
+            var tokensLengths = new int[SAMPLE.Length];
 
             var tokenizer = new RegExpTokenizer()
                                 {
                                     TokensClasses = tokensClasses,
-                                    TokensIndices = tokensIndices
+                                    TokensIndices = tokensIndices,
+                                    TokensLengths = tokensLengths
                                 };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
@@ -91,12 +95,14 @@ namespace ScopusUnitTests
             const string SAMPLE = "windows.bugsNum=long.Max;Linu";
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
+            var tokensLengths = new int[SAMPLE.Length];
 
             var tokenizer = new RegExpTokenizer()
-            {
-                TokensClasses = tokensClasses,
-                TokensIndices = tokensIndices
-            };
+                                {
+                                    TokensClasses = tokensClasses,
+                                    TokensIndices = tokensIndices,
+                                    TokensLengths = tokensLengths
+                                };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
             tokenizer.SetEncoding(Encoding.ASCII);
@@ -144,11 +150,13 @@ namespace ScopusUnitTests
             const string SAMPLE = "windows.bugsNum=long.Max;Linu";
             var tokensClasses = new int[SAMPLE.Length];
             var tokensIndices = new int[SAMPLE.Length];
+            var tokensLengths = new int[SAMPLE.Length];
 
             var tokenizer = new RegExpTokenizer()
             {
                 TokensClasses = tokensClasses,
-                TokensIndices = tokensIndices
+                TokensIndices = tokensIndices,
+                TokensLengths = tokensLengths
             };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());

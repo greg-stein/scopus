@@ -51,6 +51,7 @@ namespace Scopus.LexicalAnalysis
         public byte[] Buffer { get; private set; }
         public int[] TokensIndices { get; private set; }
         public int[] TokensClasses { get; private set; }
+        public int[] TokensLengths { get; private set; }
 
         public ITokenizer Tokenizer
         {
@@ -60,6 +61,7 @@ namespace Scopus.LexicalAnalysis
                 mTokenizer = value;
                 mTokenizer.TokensClasses = TokensClasses;
                 mTokenizer.TokensIndices = TokensIndices;
+                mTokenizer.TokensLengths = TokensLengths;
                 mTokenizer.SetEncoding(encoding);
             }
         }
@@ -110,6 +112,7 @@ namespace Scopus.LexicalAnalysis
             Buffer = new byte[BufferSize];
             TokensIndices = new int[BufferSize + 1]; // 1 for setting last non existing lexeme index
             TokensClasses = new int[BufferSize];
+            TokensLengths = new int[BufferSize];
         }
 
         /// <summary>

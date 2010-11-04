@@ -17,12 +17,16 @@ namespace Scopus.SyntaxAnalysis
             GrammarSymbols.Add(endMark);
         }
 
-        internal List<Production> Productions { get; private set; }
+        // returns end marker terminal (stored at index 0)
+        internal Terminal EndMarker { get { return UsedTerminals[0]; } }
+
         // contains productions, which configurate this grammar
-        internal List<NonTerminal> NonTerminals { get; private set; }
+        internal List<Production> Productions { get; private set; }
         // contains all non-terminal symbols, met in productions
-        internal List<Terminal> UsedTerminals { get; private set; } // contains terminals, only found in productions;
+        internal List<NonTerminal> NonTerminals { get; private set; }
         // may not be equal to amount of tokens added to tokenizer
+        internal List<Terminal> UsedTerminals { get; private set; } // contains terminals, only found in productions;
+        // contains union of UsedTerminals and NonTerminals
         internal List<GrammarEntity> GrammarSymbols { get; private set; }
 
         public Production this[int index]
@@ -30,7 +34,6 @@ namespace Scopus.SyntaxAnalysis
             get { return Productions[index]; }
         }
 
-        // contains union of UsedTerminals and NonTerminals
 
         #region ICollection<Production> Members
 
@@ -54,6 +57,7 @@ namespace Scopus.SyntaxAnalysis
             foreach (GrammarEntity entity in expression)
             {
                 if (!GrammarSymbols.Contains(entity)) GrammarSymbols.Add(entity);
+                // TODO: check: else continue;
 
                 var terminal = (entity as Terminal);
                 if (terminal != null && !UsedTerminals.Contains(terminal))

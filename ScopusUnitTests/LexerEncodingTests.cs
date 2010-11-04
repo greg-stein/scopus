@@ -32,6 +32,7 @@ namespace ScopusUnitTests
             const string input   = "עברית русский english עברית english русский עברית";
             int[] tokenClasses = new int[input.Length];
             int[] tokenIndices = new int[input.Length];
+            int[] tokenLengths = new int[input.Length];
 
             int hebClass = hebrewWord.TokenClassID;
             int engClass = englishWord.TokenClassID;
@@ -46,6 +47,7 @@ namespace ScopusUnitTests
 
             tokenizer.TokensClasses = tokenClasses;
             tokenizer.TokensIndices = tokenIndices;
+            tokenizer.TokensLengths = tokenLengths;
             int tokensNum = tokenizer.Tokenize(rawInput, 0, rawInput.Length) + 1;
 
             Assert.That(tokensNum, Is.EqualTo(expectedTokenClasses.Length));

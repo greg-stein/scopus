@@ -93,7 +93,7 @@ namespace Scopus.LexicalAnalysis
         {
             ++mIndex;
             mCurrent.Offset = mCollection.TokensIndices[mIndex];
-            mCurrent.Length = mCollection.TokensIndices[mIndex + 1] - mCollection.TokensIndices[mIndex];
+            mCurrent.Length = mCollection.TokensLengths[mIndex]; // mCollection.TokensIndices[mIndex + 1] - mCollection.TokensIndices[mIndex];
             mCurrent.Class = mCollection.TokensClasses[mIndex];
             mCurrent.Buffer = mCollection.LexemesBuffer;
         }

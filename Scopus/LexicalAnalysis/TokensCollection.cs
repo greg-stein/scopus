@@ -14,6 +14,7 @@ namespace Scopus.LexicalAnalysis
 
             TokensIndices = lexer.TokensIndices;
             TokensClasses = lexer.TokensClasses;
+            TokensLengths = lexer.TokensLengths;
 
             RetrieveTokens();
         }
@@ -21,6 +22,7 @@ namespace Scopus.LexicalAnalysis
         internal byte[] LexemesBuffer { get; private set; }
         internal int[] TokensIndices { get; private set; }
         internal int[] TokensClasses { get; private set; }
+        internal int[] TokensLengths { get; private set; }
 
         #region ICollection<Token> Members
 

@@ -30,6 +30,11 @@ namespace Scopus.LexicalAnalysis
         int[] TokensClasses { get; }
 
         /// <summary>
+        /// 
+        /// </summary>
+        int[] TokensLengths { get; }
+
+        /// <summary>
         /// Gets or sets <see cref="ITokenizer"/> for lexer.
         /// </summary>
         ITokenizer Tokenizer { get; set; }

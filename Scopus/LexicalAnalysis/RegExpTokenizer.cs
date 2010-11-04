@@ -21,6 +21,7 @@ namespace Scopus.LexicalAnalysis
 
         public int[] TokensIndices { get; set; }
         public int[] TokensClasses { get; set; }
+        public int[] TokensLengths { get; set; }
 
         public void SetTransitionFunction(ITransitionFunction function)
         {
@@ -87,6 +88,7 @@ namespace Scopus.LexicalAnalysis
                 int tokenClass;
                 int tokenLength = mTransitionFunction.MatchToken(buffer, i, length, out tokenClass);
                 TokensClasses[tokensCount] = tokenClass;
+                TokensLengths[tokensCount] = tokenLength;
 
                 i += tokenLength;
 
