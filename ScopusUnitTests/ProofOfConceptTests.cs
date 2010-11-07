@@ -282,7 +282,7 @@ namespace ScopusUnitTests
 								  R --> L
                               };
 
-            var ptBuilder = new ParsingTable();
+            var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
 
             Assert.Throws(typeof(ParserException), ptBuilder.ConstructParsingTable);
@@ -337,7 +337,7 @@ namespace ScopusUnitTests
 			parser.Grammar = grammar;
 			parser.Lexer = lexer;
 
-		    var ptBuilder = new ParsingTable();
+		    var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
             ptBuilder.ConstructParsingTable();
             parser.ParsingTable = ptBuilder.GetTable();

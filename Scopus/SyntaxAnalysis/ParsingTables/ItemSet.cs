@@ -10,7 +10,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         {
             KernelItemsCount = kernel.Count;
             ID = id;
-            Closure = ParsingTable.Closure(g, kernel);
+            Closure = SLRParsingTableBuilder.Closure(g, kernel);
         }
 
         internal List<Item> Closure { get; private set; }

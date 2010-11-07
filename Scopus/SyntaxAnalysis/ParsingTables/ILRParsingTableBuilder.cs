@@ -1,6 +1,6 @@
 ﻿namespace Scopus.SyntaxAnalysis.ParsingTables
 {
-    interface IParsingTableBuilder
+    interface ILRParsingTableBuilder
     {
         void SetGrammar(Grammar g);
         void ConstructParsingTable();

@@ -4,7 +4,7 @@ using Scopus.Exceptions;
 
 namespace Scopus.SyntaxAnalysis.ParsingTables
 {
-    public class ParsingTable : IParsingTableBuilder
+    public class SLRParsingTableBuilder : ILRParsingTableBuilder
     {
         private AugmentedGrammar mG;
         private List<ItemSet[]> mAutomatonGraphTable;
@@ -16,14 +16,14 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         internal Dictionary<int, List<Terminal>> First { get; private set; }
         internal Dictionary<int, List<Terminal>> Follow { get; private set; }
 
-        public ParsingTable()
+        public SLRParsingTableBuilder()
         {
             ItemSets = new Dictionary<ItemSet, ItemSet>();
             ItemSetsList = new List<ItemSet>();
             parsingTable = new LRParsingTable();
         }
 
-        internal ParsingTable(ActionTableEntry[,] actionTable, int[,] gotoTable) : this()
+        internal SLRParsingTableBuilder(ActionTableEntry[,] actionTable, int[,] gotoTable) : this()
         {
             parsingTable.ActionTable = actionTable;
             parsingTable.GotoTable = gotoTable;

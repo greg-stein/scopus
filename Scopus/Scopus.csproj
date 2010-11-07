@@ -93,11 +93,11 @@
     <Compile Include="SyntaxAnalysis\ParsingTables\ActionTableEntry.cs" />
     <Compile Include="SyntaxAnalysis\ParserAction.cs" />
     <Compile Include="SyntaxAnalysis\ParserContext.cs" />
-    <Compile Include="SyntaxAnalysis\ParsingTables\IParsingTableBuilder.cs" />
+    <Compile Include="SyntaxAnalysis\ParsingTables\ILRParsingTableBuilder.cs" />
     <Compile Include="SyntaxAnalysis\ParsingTables\Item.cs" />
     <Compile Include="SyntaxAnalysis\ParsingTables\ItemSet.cs" />
     <Compile Include="SyntaxAnalysis\ParsingTables\LRParsingTable.cs" />
-    <Compile Include="SyntaxAnalysis\ParsingTables\ParsingTable.cs" />
+    <Compile Include="SyntaxAnalysis\ParsingTables\SLRParsingTableBuilder.cs" />
     <Compile Include="SyntaxAnalysis\Production.cs" />
     <Compile Include="SyntaxAnalysis\Terminal.cs" />
     <Compile Include="SyntaxAnalysis\TerminalValues.cs" />

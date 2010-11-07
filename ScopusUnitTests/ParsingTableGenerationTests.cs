@@ -56,7 +56,7 @@ namespace ScopusUnitTests
         public void ClosureCalculationTest()
         {
 			var list = new List<Item> { new Item(grammar.InitialProduction, 0) };
-        	var closure = ParsingTable.Closure(grammar, list);
+        	var closure = SLRParsingTableBuilder.Closure(grammar, list);
 
             var expectedClosure = new HashSet<Item>
                                       {
@@ -81,7 +81,7 @@ namespace ScopusUnitTests
                               new Item(E --> E & plus & T, 1)
                           };
 
-            var ptBuilder = new ParsingTable();
+            var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
             ptBuilder.ConstructParsingTable();
 
@@ -102,7 +102,7 @@ namespace ScopusUnitTests
 		public void GotoTableCalculationTest()
 		{
 
-			var ptBuilder = new ParsingTable();
+			var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
             ptBuilder.ConstructParsingTable();
 		    var pt = ptBuilder.GetTable();
@@ -148,7 +148,7 @@ namespace ScopusUnitTests
 		[Test]
 		public void FollowSetsCalculationTest()
 		{
-            var ptBuilder = new ParsingTable();
+            var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
             ptBuilder.ConstructParsingTable();
 
@@ -164,7 +164,7 @@ namespace ScopusUnitTests
 		[Test]
 		public void ActionTableCalculationTest()
 		{
-            var ptBuilder = new ParsingTable();
+            var ptBuilder = new SLRParsingTableBuilder();
             ptBuilder.SetGrammar(grammar);
             ptBuilder.ConstructParsingTable();
             var pt = ptBuilder.GetTable();
