@@ -81,7 +81,11 @@ namespace ScopusUnitTests
                               new Item(E --> E & plus & T, 1)
                           };
 
-			var goTo = new ParsingTable(grammar).Goto(new ItemSet(grammar, list, 0), grammar.GrammarSymbols.IndexOf(plus));
+            var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+            ptBuilder.ConstructParsingTable();
+
+			var goTo = ptBuilder.Goto(new ItemSet(grammar, list, 0), grammar.GrammarSymbols.IndexOf(plus));
             var expectedGoto = new HashSet<Item>
                                       {
                                           new Item(E --> E & plus & T, 2),
@@ -97,7 +101,11 @@ namespace ScopusUnitTests
 		[Test]
 		public void GotoTableCalculationTest()
 		{
-			var pt = new ParsingTable(grammar);
+
+			var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+            ptBuilder.ConstructParsingTable();
+		    var pt = ptBuilder.GetTable();
 
 			Assert.That(pt.GotoTable[0, 0], Is.EqualTo(1));
 			Assert.That(pt.GotoTable[0, 1], Is.EqualTo(2));
@@ -140,21 +148,26 @@ namespace ScopusUnitTests
 		[Test]
 		public void FollowSetsCalculationTest()
 		{
-			var pt = new ParsingTable(grammar);
+            var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+            ptBuilder.ConstructParsingTable();
 
-			Assert.That(pt.Follow.Count, Is.EqualTo(4));
+			Assert.That(ptBuilder.Follow.Count, Is.EqualTo(4));
 			var followE = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, rightBrace };
-			Assert.That(pt.Follow[E.ID], Is.EqualTo(followE));
+			Assert.That(ptBuilder.Follow[E.ID], Is.EqualTo(followE));
 			var followT = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
-			Assert.That(pt.Follow[T.ID], Is.EqualTo(followT));
+			Assert.That(ptBuilder.Follow[T.ID], Is.EqualTo(followT));
 			var followF = new List<Terminal> { grammar.UsedTerminals[Terminal.END_MARKER_TOKEN_ID], plus, mult, rightBrace, };
-			Assert.That(pt.Follow[F.ID], Is.EqualTo(followF));
+			Assert.That(ptBuilder.Follow[F.ID], Is.EqualTo(followF));
 		}
 
 		[Test]
 		public void ActionTableCalculationTest()
 		{
-			var pt = new ParsingTable(grammar);
+            var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+            ptBuilder.ConstructParsingTable();
+            var pt = ptBuilder.GetTable();
 
 			Assert.That(pt.ActionTable[0, 1].Action, Is.EqualTo(ParserAction.Shift));
 			Assert.That(pt.ActionTable[0, 1].Destination, Is.EqualTo(5));

@@ -1,40 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Scopus.Exceptions;
 
 namespace Scopus.SyntaxAnalysis.ParsingTables
 {
-    public class ParsingTable
+    public class ParsingTable : IParsingTableBuilder
     {
-        private readonly AugmentedGrammar mG;
+        private AugmentedGrammar mG;
         private List<ItemSet[]> mAutomatonGraphTable;
+        private LRParsingTable parsingTable;
 
-        private ParsingTable()
-        {
-            ItemSets = new Dictionary<ItemSet, ItemSet>();
-            ItemSetsList = new List<ItemSet>();
-        }
-
-        public ParsingTable(AugmentedGrammar grammar) : this()
-        {
-            mG = grammar;
-            BuildParsingTable();
-        }
-
-        internal ParsingTable(ActionTableEntry[,] actionTable, int[,] gotoTable) : this()
-        {
-            ActionTable = actionTable;
-            GotoTable = gotoTable;
-        }
-
-        internal ActionTableEntry[,] ActionTable { get; set; }
-        internal int[,] GotoTable { get; set; }
         internal Dictionary<ItemSet, ItemSet> ItemSets { get; private set; }
         internal List<ItemSet> ItemSetsList { get; private set; }
         // Dictionary makes no guarantees to enumerate elements by order of addition
         internal Dictionary<int, List<Terminal>> First { get; private set; }
         internal Dictionary<int, List<Terminal>> Follow { get; private set; }
 
-        internal void BuildParsingTable()
+        public ParsingTable()
+        {
+            ItemSets = new Dictionary<ItemSet, ItemSet>();
+            ItemSetsList = new List<ItemSet>();
+            parsingTable = new LRParsingTable();
+        }
+
+        internal ParsingTable(ActionTableEntry[,] actionTable, int[,] gotoTable) : this()
+        {
+            parsingTable.ActionTable = actionTable;
+            parsingTable.GotoTable = gotoTable;
+        }
+
+        public void ConstructParsingTable()
         {
             mAutomatonGraphTable = new List<ItemSet[]>();
             ItemSets.Clear();
@@ -49,7 +44,17 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
             mAutomatonGraphTable = null;
         }
 
-        internal void BuildCollectionOfItemSets()
+        public void SetGrammar(Grammar g)
+        {
+            mG = (AugmentedGrammar)g;
+        }
+
+        public LRParsingTable GetTable()
+        {
+            return parsingTable;
+        }
+
+        private void BuildCollectionOfItemSets()
         {
             // all items produced by Goto function will be automatically added to ItemSets and AutomatonGraphTable
             var initialSet = new List<Item> {new Item(mG.InitialProduction, 0)};
@@ -107,14 +112,14 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
 
         private void BuildGotoTable()
         {
-            GotoTable = new int[mAutomatonGraphTable.Count,mG.NonTerminals.Count];
+            parsingTable.GotoTable = new int[mAutomatonGraphTable.Count,mG.NonTerminals.Count];
             int nTermID = 0;
             for (int symbolID = 0; symbolID < mG.GrammarSymbols.Count; symbolID++)
             {
                 if (mG.GrammarSymbols[symbolID].GetType() == typeof (NonTerminal))
                 {
                     for (int stateID = 0; stateID < mAutomatonGraphTable.Count; stateID++)
-                        GotoTable[stateID, nTermID] = (mAutomatonGraphTable[stateID][symbolID] == null)
+                        parsingTable.GotoTable[stateID, nTermID] = (mAutomatonGraphTable[stateID][symbolID] == null)
                                                           ? -1
                                                           : mAutomatonGraphTable[stateID][symbolID].ID;
                     nTermID++;
@@ -122,7 +127,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
             }
         }
 
-        internal void BuildFirstSets()
+        private void BuildFirstSets()
         {
             First = new Dictionary<int, List<Terminal>>(mG.NonTerminals.Count);
             foreach (NonTerminal nTerm in mG.NonTerminals)
@@ -158,7 +163,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
                 }
         }
 
-        internal void BuildFollowSets()
+        private void BuildFollowSets()
         {
             Follow = new Dictionary<int, List<Terminal>>(mG.NonTerminals.Count + 1);
             Follow.Add(mG.InitialProduction.Symbol.ID,
@@ -214,7 +219,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         private void BuildActionTable()
         {
             // this routine humbly expects that token ID provider will always be the simpliest one (next ID = ID++)
-            ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count,mG.UsedTerminals.Count];
+            parsingTable.ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count, mG.UsedTerminals.Count];
                 //mG.UsedTerminals.Count];
             int stateID;
 
@@ -226,8 +231,8 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
                         mAutomatonGraphTable[stateID][symbolID] != null)
                     {
                         var term = (Terminal) mG.GrammarSymbols[symbolID];
-                        ActionTable[stateID, term.TokenClassID].Action = ParserAction.Shift;
-                        ActionTable[stateID, term.TokenClassID].Destination = mAutomatonGraphTable[stateID][symbolID].ID;
+                        parsingTable.ActionTable[stateID, term.TokenClassID].Action = ParserAction.Shift;
+                        parsingTable.ActionTable[stateID, term.TokenClassID].Destination = mAutomatonGraphTable[stateID][symbolID].ID;
                     }
             }
 
@@ -245,17 +250,17 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
                         {
                             foreach (Terminal followTerm in Follow[item.Production.Symbol.ID])
                             {
-                                if (ActionTable[stateID, followTerm.TokenClassID].Action != ParserAction.Error)
+                                if (parsingTable.ActionTable[stateID, followTerm.TokenClassID].Action != ParserAction.Error)
                                     throw new ParserException("Provided grammar is not compliant with SLR(1) parser.");
-                                ActionTable[stateID, followTerm.TokenClassID].Action = ParserAction.Reduce;
-                                ActionTable[stateID, followTerm.TokenClassID].Destination = item.Production.ID;
+                                parsingTable.ActionTable[stateID, followTerm.TokenClassID].Action = ParserAction.Reduce;
+                                parsingTable.ActionTable[stateID, followTerm.TokenClassID].Destination = item.Production.ID;
                             }
                         }
                         else
                         {
-                            if (ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action != ParserAction.Error)
+                            if (parsingTable.ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action != ParserAction.Error)
                                 throw new ParserException("Provided grammar is not compliant with SLR(1) parser.");
-                            ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action = ParserAction.Accept;
+                            parsingTable.ActionTable[stateID, Terminal.END_MARKER_TOKEN_ID].Action = ParserAction.Accept;
                         }
                     }
                 }

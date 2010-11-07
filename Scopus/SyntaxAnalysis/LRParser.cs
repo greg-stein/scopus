@@ -16,7 +16,7 @@ namespace Scopus.SyntaxAnalysis
             SyntaxError += DefaultErrorRecoveryRoutine;
         }
 
-        public ParsingTable ParsingTable { get; set; }
+        public LRParsingTable ParsingTable { get; set; }
 
         #region IParser Members
 
@@ -37,9 +37,6 @@ namespace Scopus.SyntaxAnalysis
             {
                 int s = mStatesStack.Peek();
                 ActionTableEntry actionEntry = ParsingTable.ActionTable[s, tokenEnumerator.Current.Class];
-
-                // todo: TRACE option
-                //Trace(actionEntry, tokenEnumerator.Current);
 
                 if (actionEntry.Action == ParserAction.Shift)
                 {

@@ -14,6 +14,12 @@
             return mName;
         }
 
+        //TODO: Add two fields: 
+        // public object Data { get; set; }
+        // private Dictionary<object, object>
+        // public indexer for the dictionary
+        
+
         // IMPLEMENTATION NOTICE:
         //
         //	The order of overloaded operators is this:

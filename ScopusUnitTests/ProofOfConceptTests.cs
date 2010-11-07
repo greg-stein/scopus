@@ -244,7 +244,7 @@ namespace ScopusUnitTests
             Console.WriteLine("Parsing process:\n");
             parser.Grammar = grammar;
             parser.Lexer = lexer;
-            parser.ParsingTable = new ParsingTable(actionTable, gotoTable);
+            parser.ParsingTable = new LRParsingTable(actionTable, gotoTable);
             parser.InputAccepted += (sender, eventArgs) => Console.WriteLine("Accepted!");
             parser.ParseInput();
 
@@ -282,7 +282,10 @@ namespace ScopusUnitTests
 								  R --> L
                               };
 
-			Assert.Throws(typeof(ParserException), () => new ParsingTable(grammar));
+            var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+
+            Assert.Throws(typeof(ParserException), ptBuilder.ConstructParsingTable);
 		}
 
 		[Test]
@@ -333,7 +336,12 @@ namespace ScopusUnitTests
 			Console.WriteLine("Parsing process:\n");
 			parser.Grammar = grammar;
 			parser.Lexer = lexer;
-			parser.ParsingTable = new ParsingTable(grammar);
+
+		    var ptBuilder = new ParsingTable();
+            ptBuilder.SetGrammar(grammar);
+            ptBuilder.ConstructParsingTable();
+            parser.ParsingTable = ptBuilder.GetTable();
+
 			parser.InputAccepted += (sender, eventArgs) => Console.WriteLine("Accepted!");
 			parser.ParseInput();
 
