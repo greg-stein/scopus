@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Scopus.Auxiliary;
 
 namespace Scopus.LexicalAnalysis
 {
-    public class FiniteAutomata
+    [Serializable]
+    public class FiniteAutomata : ICloneable
     {
         internal FiniteAutomata(string name, bool createMarginalStates)
         {
@@ -26,7 +29,6 @@ namespace Scopus.LexicalAnalysis
         }
 
         internal string Name { get; private set; }
-
         internal State StartState { get; set; }
         internal State Terminator { get; set; }
 
@@ -59,6 +61,15 @@ namespace Scopus.LexicalAnalysis
         public override string ToString()
         {
             return Name;
+        }
+
+        /// <summary>
+        /// This does deep clone!
+        /// </summary>
+        /// <returns></returns>
+        public object Clone()
+        {
+            return CommonRoutines.DeepCopy(this);
         }
     }
 }

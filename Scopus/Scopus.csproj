@@ -55,6 +55,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Auxiliary\ByteArrayRoutines.cs" />
+    <Compile Include="Auxiliary\CommonRoutines.cs" />
     <Compile Include="Auxiliary\IDProvider.cs" />
     <Compile Include="Auxiliary\TraceAttribute.cs" />
     <Compile Include="Exceptions\ParserException.cs" />
@@ -70,11 +72,16 @@
     <Compile Include="LexicalAnalysis\Algorithms\NFAToDFAConverter.cs" />
     <Compile Include="LexicalAnalysis\RegExpTokenizer.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\AlternationRegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\NegatedCharClassRegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\RangeRegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\RegExpNotation.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\LiteralRegExp.cs" />
     <Compile Include="LexicalAnalysis\FiniteAutomata.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\NegationRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\OptionalRegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\POSIXRegExpParser.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RegExp.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\RegExpParser.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RepetitionAtLeastOneRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RepetitionRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\SequenceRegExp.cs" />
@@ -84,6 +91,7 @@
     <Compile Include="LexicalAnalysis\TokensEnumerator.cs" />
     <Compile Include="PrimitivesParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScopusFacade.cs" />
     <Compile Include="SyntaxAnalysis\AugmentedGrammar.cs" />
     <Compile Include="SyntaxAnalysis\Grammar.cs" />
     <Compile Include="SyntaxAnalysis\GrammarEntity.cs" />

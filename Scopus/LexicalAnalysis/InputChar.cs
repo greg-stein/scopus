@@ -2,11 +2,11 @@
 
 namespace Scopus.LexicalAnalysis
 {
-    //TODO: replace char? with byte?, since unicode will be supported by double transition 
-    //TODO: I.e. transition on first byte and second byte. 
+    //TODO: Rename to InputByte, cause it really byte, not char.
     /// <summary>
     /// Represents single input char or epsilon
     /// </summary>
+    [Serializable]
     internal class InputChar : IEquatable<InputChar>
     {
         private readonly byte? value;

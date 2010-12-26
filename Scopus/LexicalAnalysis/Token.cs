@@ -1,17 +1,12 @@
 ﻿using System;
 using System.Text;
+using Scopus.Auxiliary;
 
 namespace Scopus.LexicalAnalysis
 {
     public class Token : ICloneable, IEquatable<Token>, IDisposable
     {
         public const int UNDEFINED_CLASS = -1;
-
-        private static readonly uint[] LENGTH_MASKS =
-            new uint[]
-                {
-                    0x00000000, 0x000000FF, 0x0000FFFF, 0x00FFFFFF
-                };
 
         internal Token()
         {
@@ -59,36 +54,14 @@ namespace Scopus.LexicalAnalysis
 
         #region IEquatable<Token> Members
 
-        public unsafe bool Equals(Token other)
+        public bool Equals(Token other)
         {
             if (Length != other.Length)
                 return false;
             if (Class != other.Class)
                 return false;
 
-            fixed (byte* buffOtherB = other.Buffer)
-            fixed (byte* buffThisB = Buffer)
-            {
-                var buffOtherI = (int*) (buffOtherB + other.Offset);
-                var buffThisI = (int*) (buffThisB + Offset);
-
-                int length = Length >> 2;
-                int i;
-                for (i = 0; i < length; i++)
-                {
-                    if (buffThisI[i] != buffOtherI[i])
-                        return false;
-                }
-
-                int skippedBytesNum = (length << 2) ^ Length;
-                if (skippedBytesNum != 0)
-                {
-                    uint mask = LENGTH_MASKS[skippedBytesNum];
-                    return (buffThisI[i] & mask) == (buffOtherI[i] & mask);
-                }
-
-                return true;
-            }
+            return ByteArrayRoutines.AreEqual(Buffer, Offset, Length, other.Buffer, other.Offset, other.Length);
         }
 
         #endregion
@@ -109,20 +82,9 @@ namespace Scopus.LexicalAnalysis
             Class = UNDEFINED_CLASS;
         }
 
-        // http://en.wikipedia.org/wiki/Fowler_Noll_Vo_hash
         public override int GetHashCode()
         {
-            const int P = 16777619; // FNV prime
-
-            unchecked
-            {
-                var hash = (int) 2166136261; // FNV offset basis
-
-                for (int i = Offset; i < Offset + Length; i++)
-                    hash = (hash ^ Buffer[i])*P;
-
-                return hash;
-            }
+            return ByteArrayRoutines.GetArrayHashCode(Buffer, Offset, Length);
         }
 
         public override bool Equals(Object obj)

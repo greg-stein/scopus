@@ -1,11 +1,12 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     /// <summary>
     /// Used for building regular expressions
     /// </summary>
-    public abstract class RegExp
+    public abstract class RegExp 
     {
         private Encoding mEncoding = Encoding.ASCII;
 
@@ -45,6 +46,17 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         public static RegExp Choice(params RegExp[] regExps)
         {
             return new AlternationRegExp(regExps);
+        }
+
+        /// <summary>
+        /// Builds range regular expression that matches any char within given range.
+        /// </summary>
+        /// <param name="left">Char represents first symbol in range</param>
+        /// <param name="right">Char represents last symbol in range</param>
+        /// <returns></returns>
+        public static RegExp Range(char left, char right, Encoding encoding)
+        {
+            return new RangeRegExp(left, right, encoding);
         }
 
         /// <summary>
@@ -131,6 +143,37 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         public static RegExp Literal(string literal, Encoding encoding)
         {
             return new LiteralRegExp(literal, encoding);
+        }
+
+        /// <summary>
+        /// Returns regular expression that matches given byte
+        /// </summary>
+        /// <param name="literal">A single byte literal</param>
+        /// <returns></returns>
+        public static RegExp Literal(byte literal)
+        {
+            return new LiteralRegExp(literal);
+        }
+
+        /// <summary>
+        /// Returns regular expression that matches given sequence of bytes
+        /// </summary>
+        /// <param name="literals">byte array representing desired sequence of bytes</param>
+        /// <returns></returns>
+        public static RegExp Literal(params byte[] literals)
+        {
+            return new LiteralRegExp(literals);
+        }
+
+        /// <summary>
+        /// Builds regular expression for matching any character except given chars.
+        /// </summary>
+        /// <param name="encoding">Encoding for given literals. Encoding is used to store given literal as byte array</param>
+        /// <param name="exceptees">Chars that should NOT be matched by this regular expression</param>
+        /// <returns></returns>
+        public static RegExp LiteralExcept(Encoding encoding, params char[] exceptees)
+        {
+            return new NegatedCharClassRegExp(encoding, exceptees);
         }
 
         /// <summary>

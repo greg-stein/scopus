@@ -3,6 +3,7 @@ using Scopus.LexicalAnalysis.Algorithms;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
 {
+    // TODO: Obsolete: doesn't work and will never work! Remove it!
     public class NegationRegExp : RegExp
     {
         private RegExp mPositiveRegExp;

@@ -10,6 +10,7 @@ namespace Scopus.SyntaxAnalysis
     {
         private readonly Stack<int> mStatesStack = new Stack<int>();
         private readonly TerminalValues mValues = new TerminalValues();
+        private ILexer mLexer;
 
         public LRParser()
         {
@@ -21,7 +22,16 @@ namespace Scopus.SyntaxAnalysis
         #region IParser Members
 
         public Grammar Grammar { get; set; }
-        public ILexer Lexer { get; set; }
+        
+        public ILexer Lexer
+        {
+            get { return mLexer; }
+            set 
+            { 
+                mLexer = value; 
+                mLexer.Initialize();
+            }
+        }
 
         public event SyntaxErrorEventHandler SyntaxError;
         public event EventHandler InputAccepted;

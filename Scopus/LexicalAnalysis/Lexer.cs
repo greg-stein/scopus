@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using Scopus.LexicalAnalysis.RegularExpressions;
+using Scopus.SyntaxAnalysis;
 
 namespace Scopus.LexicalAnalysis
 {
@@ -18,6 +20,10 @@ namespace Scopus.LexicalAnalysis
         private int mLastLexemePos;
         private int mReadLength;
         private ITokenizer mTokenizer;
+        private RegExpParser regexpParser;
+        private RegExpNotation mNotation;
+        private RegExpParser mRegexpParser;
+
 
         public Lexer(ITokenizer tokenizer)
         {
@@ -53,6 +59,15 @@ namespace Scopus.LexicalAnalysis
         public int[] TokensClasses { get; private set; }
         public int[] TokensLengths { get; private set; }
 
+        public RegExpNotation RegExpNotation
+        {
+            get { return mNotation; }
+            set 
+            { 
+                mNotation = value;
+                mRegexpParser = RegExpParser.GetParser(mNotation);
+            }
+        }
         public ITokenizer Tokenizer
         {
             get { return mTokenizer; }
@@ -75,6 +90,42 @@ namespace Scopus.LexicalAnalysis
         {
             this.encoding = encoding;
             if (Tokenizer != null) Tokenizer.SetEncoding(encoding);
+        }
+
+        public void Initialize()
+        {
+            mTokenizer.BuildTransitions();
+        }
+
+        public Terminal UseEpsilon()
+        {
+            return mTokenizer.UseEpsilon();
+        }
+
+        public Terminal UseTerminal(string regexp)
+        {
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj);
+        }
+
+        public Terminal UseTerminal(string regexp, RegExpNotation notation)
+        {
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj);
+        }
+
+        public void IgnoreTerminal(string ignoree)
+        {
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.IgnoreTerminal(regExpObj);
+        }
+
+        public void IgnoreTerminal(string ignoree, RegExpNotation notation)
+        {
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.UseTerminal(regExpObj);
         }
 
         public void SetDataSource(Stream stream)

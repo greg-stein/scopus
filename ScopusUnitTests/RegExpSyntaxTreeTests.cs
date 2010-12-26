@@ -225,6 +225,101 @@ namespace ScopusUnitTests
             }
         }
 
+        // My first Data Driven Unit Test :)
+        //TODO: [TestCase("utf-7", new[] {'a', 'b', 'c'})]
+        [TestCase("utf-16be", new[] { 'a', 'ש', 'я' })]
+        [TestCase("utf-16le", new[] { 'a', 'ש', 'я' })]
+        [TestCase("utf-8", new[] { 'a', 'ש', 'я' })]
+        [TestCase("ascii", new[] { 'a', 'b', 'c' })]
+        [Test]
+        public void NegatedCharRegExpConstructionTest(string encodingName, params char[] exceptees)
+        {
+            // Since it is impossible to pass Encoding class in attribute parameters, we 
+            // obtain it depending on given string.
+            var encoding = GetEncoding(encodingName);
+            var regExp = RegExp.LiteralExcept(encoding, exceptees);
+            var nfa = regExp.AsNFA(true);
+
+            State simulatedState;
+            for (int i = 0; i <= char.MaxValue; i++)
+            {
+                byte[] bytes = encoding.GetBytes(new[] { (char)i });
+
+                // If i is NOT in the exceptees
+                if (Array.IndexOf(exceptees, (char) i) == -1)
+                {
+                    simulatedState = SimulateNFA(nfa.StartState, bytes);
+
+                    Assert.That(simulatedState.IsAccepting, String.Format("Failed! i = {0} ({1})", i, (char) i));
+                }
+                else
+                {
+                    Assert.Throws(typeof(SimulationException), () => SimulateNFA(nfa.StartState, bytes));
+                }
+            }
+        }
+
+        [TestCase('a', 'ש', "utf-16le")]
+        [TestCase('a', 'ש', "utf-16be")]
+        [TestCase('a', 'ש', "utf-8")]
+        [TestCase('a', 'g', "ascii")]
+        [Test]
+        public void RangeRegExpConstructionTest(char left, char right, string encodingName)
+        {
+            var encoding = GetEncoding(encodingName);
+            var regExp = RegExp.Range(left, right, encoding);
+            var nfa = regExp.AsNFA(true);
+
+            State simulatedState;
+            for (int i = 0; i <= char.MaxValue; i++)
+            {
+                var bytes = encoding.GetBytes(new[] { (char)i });
+                if (i >= left && i <= right)
+                {
+                    simulatedState = SimulateNFA(nfa.StartState, bytes);
+                    Assert.That(simulatedState.IsAccepting, String.Format("Failed! i = {0} ({1})", i, (char)i));
+                }
+                else
+                {
+                    Assert.Throws(typeof(SimulationException), () => SimulateNFA(nfa.StartState, bytes));
+                }
+            }
+        }
+
+        private static Encoding GetEncoding(string name)
+        {
+            switch (name.ToLower())
+            {
+                case "utf-16le":
+                    return Encoding.Unicode;
+                case "utf-8":
+                    return Encoding.UTF8;
+                case "utf-7":
+                    return Encoding.UTF7;
+                case "utf-16be":
+                    return Encoding.BigEndianUnicode;
+                case "utf-32le":
+                    return Encoding.UTF32;
+                case "ascii":
+                    return Encoding.ASCII;
+
+                default:
+                    return Encoding.Unicode;
+            }
+        }
+
+        private static State SimulateNFA(State transitionToUse, params byte[] inputChars)
+        {
+            byte?[] nullableBytes = new byte?[inputChars.Length];
+
+            for (int i = 0; i < inputChars.Length; i++)
+            {
+                nullableBytes[i] = inputChars[i];
+            }
+
+            return Simulate(transitionToUse, nullableBytes);
+        }
+
         private static State Simulate(int transitionToUse, State s, params byte?[] inputChars)
         {
             if (inputChars == null)
@@ -257,7 +352,8 @@ namespace ScopusUnitTests
 
         private class SimulationException : Exception
         {
-            public SimulationException(string simulationNoTransitionForTheSymbol)
+            public SimulationException(string message)
+                : base(message)
             {
             }
         }

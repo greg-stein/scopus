@@ -55,12 +55,7 @@ namespace ScopusUnitTests
             }
         }
 
-        [Test, Ignore] 
-        // TODO
-        // This test wont work, since Indices array holds indices of tokens. 
-        // Token lengths are not saved at any array. In order to make it possible
-        // we need to use additional array that will store token lengths. Further 
-        // modification should be done in Lexer and TokenCollection.
+        [Test] 
         public void IgnoreTokenTest()
         {
             ITokenizer tokenizer = new RegExpTokenizer();
@@ -76,12 +71,13 @@ namespace ScopusUnitTests
                 RegExp.Literal(' '), RegExp.Literal('\t'), RegExp.Literal('\n'))));
 
             // "/*^(*/)*/
-            tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal("/*"), RegExp.AnyNumberOf(RegExp.Not(RegExp.Literal("*/"))), RegExp.Literal("*/")));
+            //tokenizer.IgnoreTerminal(RegExp.Sequence(RegExp.Literal("/*"), RegExp.AnyNumberOf(RegExp.Not(RegExp.Literal("*/"))), RegExp.Literal("*/")));
+            tokenizer.IgnoreTerminal(RegExp.Literal("abcdefghijklmnopqr"));
             tokenizer.BuildTransitions();
 
             // Number of tokens:  1  23  45                 67
             // Indices:           012345678901234567890123456789
-            const string input = "123 456 /* Some comment */ 789";
+            const string input = "123 456 abcdefghijklmnopqr 789";
             int[] tokenClasses = new int[input.Length];
             int[] tokenIndices = new int[input.Length];
             int[] tokenLengths = new int[input.Length];
