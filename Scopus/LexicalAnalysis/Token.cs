@@ -91,8 +91,9 @@ namespace Scopus.LexicalAnalysis
         {
             if (obj == null) return base.Equals(obj);
 
-            if (obj is Token)
-                return Equals(obj as Token);
+            var token = obj as Token;
+            if (token != null)
+                return Equals(token);
 
             return false;
         }

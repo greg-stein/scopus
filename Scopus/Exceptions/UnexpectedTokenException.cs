@@ -8,8 +8,8 @@ namespace Scopus.Exceptions
     public class UnexpectedTokenException : ParserException
     {
         public UnexpectedTokenException(Token token)
-            : base(string.Format("The lexeme was unexpected at this time ({0}:'{1}')",
-                                 token.GetType().Name, token))
+            : base(string.Format("Unexpected lexeme at {2} ({0}:'{1}')",
+                                 token.GetType().Name, token, token.Offset))
         {
             Token = (Token) token.Clone();
         }

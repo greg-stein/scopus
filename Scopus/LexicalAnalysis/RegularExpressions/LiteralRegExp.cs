@@ -7,7 +7,7 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
     /// <summary>
     /// Represents literal regular expression for single character.
     /// </summary>
-    internal class LiteralRegExp : RegExp, IEquatable<LiteralRegExp> 
+    internal class LiteralRegExp : RegExp
     {
         // TODO: Check if it is possible to move the Encoding - related logic to Lexer and leave RegExps dealing with bytes only.
         internal LiteralRegExp(byte literal)
@@ -44,7 +44,7 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
 
         private byte[] Literals { get; set; }
 
-        protected internal override System.Text.Encoding Encoding
+        protected internal override Encoding Encoding
         {
             get
             {
@@ -88,24 +88,30 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             return Encoding.GetString(Literals);
         }
 
-        public bool Equals(LiteralRegExp other)
+        public bool Equals(LiteralRegExp literalRegExp)
         {
-            return ByteArrayRoutines.AreEqual(Literals, other.Literals);
+            if (!base.Equals(literalRegExp)) return false;
+
+            if (ByteArrayRoutines.AreEqual(literalRegExp.Literals, Literals))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
-        public override bool Equals(Object obj)
+        public override bool Equals(object obj)
         {
             if (obj == null) return base.Equals(obj);
 
-            if (obj is LiteralRegExp)
-                return Equals(obj as LiteralRegExp);
+            var literalRegExp = obj as LiteralRegExp;
+            if (literalRegExp != null)
+                return Equals(literalRegExp);
 
             return false;
         }
 
-        public override int GetHashCode()
-        {
-            return ByteArrayRoutines.GetArrayHashCode(Literals);
-        }
-    }
+     }
 }

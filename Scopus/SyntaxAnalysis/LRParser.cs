@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Scopus.Exceptions;
 using Scopus.LexicalAnalysis;
 using Scopus.SyntaxAnalysis.ParsingTables;
+using System.Threading;
 
 namespace Scopus.SyntaxAnalysis
 {
@@ -42,11 +43,14 @@ namespace Scopus.SyntaxAnalysis
 
             IEnumerator<Token> tokenEnumerator = Lexer.TokensStream.GetEnumerator();
             tokenEnumerator.MoveNext();
-
+            
             while (true)
             {
                 int s = mStatesStack.Peek();
                 ActionTableEntry actionEntry = ParsingTable.ActionTable[s, tokenEnumerator.Current.Class];
+
+                //For debug only:
+                Trace(actionEntry, tokenEnumerator.Current);
 
                 if (actionEntry.Action == ParserAction.Shift)
                 {
@@ -121,6 +125,9 @@ namespace Scopus.SyntaxAnalysis
 
         private void OnInputAccepted()
         {
+            // TODO: Richter: pages 264-265
+//            EventHandler<EventArgs> temp = Interlocked.CompareExchange(ref InputAccepted, null, null);
+//            if (temp != null) temp(this, e);
             if (InputAccepted != null)
                 InputAccepted(this, new EventArgs());
         }

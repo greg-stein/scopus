@@ -5,28 +5,22 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-
-[assembly: AssemblyTitle("Scopus")]
-[assembly: AssemblyDescription("Parser Generator")]
+[assembly: AssemblyTitle("ScopusAcceptanceTests")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Scopus")]
-[assembly: AssemblyProduct("Scopus")]
-[assembly: AssemblyCopyright("Copyleft © Scopus 2010")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("ScopusAcceptanceTests")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: InternalsVisibleTo("ScopusUnitTests")]
-[assembly: InternalsVisibleTo("ScopusAcceptanceTests")]
-[assembly: InternalsVisibleTo("GraphSharpDemo")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
-
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-
-[assembly: Guid("f85a928d-9882-4ee2-8fe7-ece23cdb81fb")]
+[assembly: Guid("20a0a89c-0bc6-4452-b448-11d98c4cc2d0")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -38,6 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("1.0.*")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

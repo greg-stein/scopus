@@ -28,5 +28,24 @@
         {
             return "(" + OptionalExpression + ")?";
         }
+
+        public bool Equals(OptionalRegExp optionalRegExp)
+        {
+            if (!base.Equals(optionalRegExp)) return false;
+
+            return OptionalExpression.Equals(optionalRegExp);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var optionalRegExp = obj as OptionalRegExp;
+            if (optionalRegExp != null)
+                return Equals(optionalRegExp);
+
+            return false;
+        }
+
     }
 }

@@ -14,7 +14,6 @@ namespace ScopusUnitTests
         {
             ITokenizer tokenizer = new RegExpTokenizer();
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.Unicode);
 
             var hebrewWord = tokenizer.UseTerminal(RegExp.Literal("עברית", Encoding.Unicode)); // 1
             var russianWord = tokenizer.UseTerminal(RegExp.Literal("русский", Encoding.Unicode)); // 2

@@ -2,10 +2,13 @@
 {
     internal class RepetitionRegExp : RegExp
     {
-        internal RepetitionRegExp(RegExp expression)
+        internal Greediness Greediness { get; set; }
+
+        internal RepetitionRegExp(RegExp expression, Greediness greediness = Greediness.GreedyQuantification)
         {
             ExpressionToRepeat = expression;
             ChildExpressions = new[] {expression};
+            Greediness = greediness;
         }
 
         internal RegExp ExpressionToRepeat { get; set; }
@@ -25,7 +28,29 @@
 
         public override string ToString()
         {
-            return "(" + ExpressionToRepeat + ")*";
+            string qSign = (Greediness == Greediness.LazyQuantification) ? "?" : string.Empty;
+            return "(" + ExpressionToRepeat + ")*" + qSign;
+        }
+
+        public bool Equals(RepetitionRegExp repetitionRegExp)
+        {
+            if (!base.Equals(repetitionRegExp)) return false;
+
+            if (repetitionRegExp.ExpressionToRepeat.Equals(ExpressionToRepeat)) return false;
+            if (repetitionRegExp.Greediness != Greediness) return false;
+
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var repetitionRegExp = obj as RepetitionRegExp;
+            if (repetitionRegExp != null)
+                return Equals(repetitionRegExp);
+
+            return false;
         }
     }
 }

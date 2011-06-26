@@ -13,7 +13,7 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         /// <summary>
         /// Holds all child regular expressions
         /// </summary>
-        protected RegExp[] ChildExpressions { get; set; }
+        public RegExp[] ChildExpressions { get; protected set; }
 
         /// <summary>
         /// Encoding that used for translating LiteralRegExp into NFA.
@@ -73,20 +73,22 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         /// Builds star (repeatition - any number of occurences) regular expression: a* 
         /// </summary>
         /// <param name="regExp">Regular expression to repeat</param>
+        /// <param name="greediness">Indicates greediness of the quantifier (greedy/lazy)</param>
         /// <returns></returns>
-        public static RegExp AnyNumberOf(RegExp regExp)
+        public static RegExp AnyNumberOf(RegExp regExp, Greediness greediness = Greediness.GreedyQuantification)
         {
-            return new RepetitionRegExp(regExp);
+            return new RepetitionRegExp(regExp, greediness);
         }
 
         /// <summary>
         /// Builds plus (repeatition - at least one occurence) regular expression: a+
         /// </summary>
         /// <param name="regExp">Regular expression to repeat</param>
+        /// <param name="greediness">Indicates greediness of the quantifier (greedy/lazy)</param>
         /// <returns></returns>
-        public static RegExp AtLeastOneOf(RegExp regExp)
+        public static RegExp AtLeastOneOf(RegExp regExp, Greediness greediness = Greediness.GreedyQuantification)
         {
-            return new RepetitionAtLeastOneRegExp(regExp);
+            return new RepetitionAtLeastOneRegExp(regExp, greediness);
         }
 
         /// <summary>
@@ -94,9 +96,9 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         /// </summary>
         /// <param name="regExp">Regular expression represents an exception. Every other pattern will be accepted, but not this one.</param>
         /// <returns></returns>
-        public static RegExp Not(RegExp regExp)
+        public static RegExp Not(RegExp regExp, bool createSelfLoopsForTerminator = true)
         {
-            return new NegationRegExp(regExp);
+            return new NegationRegExp(regExp, createSelfLoopsForTerminator);
         }
 
         /// <summary>
@@ -226,6 +228,15 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                 regExp.Encoding = Encoding;
                 regExp.SetChildEncodingToParental();
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            var regExp = obj as RegExp;
+            if (regExp == null)
+                return false;
+
+            return regExp.Encoding.Equals(Encoding);
         }
     }
 }

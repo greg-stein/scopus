@@ -7,10 +7,12 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
     public class NegationRegExp : RegExp
     {
         private RegExp mPositiveRegExp;
+        private bool createLoopTransitionsOnAcceptingStates;
 
-        public NegationRegExp(RegExp regExp)
+        public NegationRegExp(RegExp regExp, bool createLoopTransitionsOnAcceptingStates = true)
         {
             mPositiveRegExp = regExp;
+            this.createLoopTransitionsOnAcceptingStates = createLoopTransitionsOnAcceptingStates;
         }
 
         internal override FiniteAutomata AsNFA()
@@ -49,9 +51,13 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                     state.IsAccepting = true;
                 }
 
-                for (int i = 0; i <= Byte.MaxValue + 1; i++)
+                // Add loop transitions on terminator for all bytes
+                if (createLoopTransitionsOnAcceptingStates)
                 {
-                    dfa.Terminator.AddTransitionTo(dfa.Terminator, InputChar.For((byte)i));
+                    for (int i = 0; i <= Byte.MaxValue + 1; i++)
+                    {
+                        dfa.Terminator.AddTransitionTo(dfa.Terminator, InputChar.For((byte) i));
+                    }
                 }
                 dfa.Terminator.IsAccepting = true;
             }

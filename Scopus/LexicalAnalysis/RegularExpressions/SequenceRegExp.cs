@@ -28,6 +28,8 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                     RegExp2 = new SequenceRegExp(RegExp2, regExps[i]);
                 }
             }
+
+            ChildExpressions = new[] {RegExp1, RegExp2};
         }
 
         internal RegExp RegExp1 { get; set; }
@@ -48,6 +50,27 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         public override string ToString()
         {
             return RegExp1 + RegExp2.ToString();
+        }
+
+        public bool Equals(SequenceRegExp sequenceRegExp)
+        {
+            if (!base.Equals(sequenceRegExp)) return false;
+
+            if (sequenceRegExp.RegExp1.Equals(RegExp1)) return false;
+            if (sequenceRegExp.RegExp2.Equals(RegExp2)) return false;
+
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var sequenceRegExp = obj as SequenceRegExp;
+            if (sequenceRegExp != null)
+                return Equals(sequenceRegExp);
+
+            return false;
         }
     }
 }

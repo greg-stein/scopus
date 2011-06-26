@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Scopus.Auxiliary;
 using Scopus.LexicalAnalysis.Algorithms;
 using Scopus.LexicalAnalysis.RegularExpressions;
@@ -13,7 +12,7 @@ namespace Scopus.LexicalAnalysis
         private readonly FiniteAutomata mAllTokensNfa = new FiniteAutomata();
         private readonly IDProvider mClassIdProvider = new IDProvider();
         private readonly HashSet<int> mIgnoredTokens = new HashSet<int>();
-        private Encoding mEncoding;
+        private readonly Dictionary<int, Func<Token, bool>> mLexicalActions = new Dictionary<int, Func<Token, bool>>();
         private int mTotalTokensCount;
         private ITransitionFunction mTransitionFunction;
 
@@ -29,12 +28,10 @@ namespace Scopus.LexicalAnalysis
             mClassIdProvider.GetNext(); // skip 0, cuz it reserved for Epsilon terminal
         }
 
-        public Terminal UseTerminal(RegExp regExp)
+        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction)
         {
-            regExp.Encoding = mEncoding;
-            FiniteAutomata tokenNfa = regExp.AsNFA();
-            tokenNfa.Terminator.IsAccepting = true;
-            tokenNfa.Terminator.TokenClass = mClassIdProvider.GetNext();
+            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
+            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
 
             AddTokenToNfa(tokenNfa);
 
@@ -42,15 +39,83 @@ namespace Scopus.LexicalAnalysis
             return terminal;
         }
 
-        public void IgnoreTerminal(RegExp ignoree)
+        public Terminal UseTerminal(RegExp regExp, Greediness greediness)
         {
-            ignoree.Encoding = mEncoding;
-            FiniteAutomata tokenNfa = ignoree.AsNFA();
-            tokenNfa.Terminator.IsAccepting = true;
-            tokenNfa.Terminator.TokenClass = mClassIdProvider.GetNext();
+            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
+            tokenNfa.Terminator.Greediness = greediness;
+
+            AddTokenToNfa(tokenNfa);
+
+            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
+            return terminal;
+        }
+
+        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction, Greediness greediness)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
+            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
+            tokenNfa.Terminator.Greediness = greediness;
+
+            AddTokenToNfa(tokenNfa);
+
+            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
+            return terminal;
+        }
+
+        public Terminal UseTerminal(RegExp regExp)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
+
+            AddTokenToNfa(tokenNfa);
+
+            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
+            return terminal;
+        }
+
+        public void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
+            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
             mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
 
             AddTokenToNfa(tokenNfa);
+        }
+
+        public void IgnoreTerminal(RegExp ignoree, Greediness greediness)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
+            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
+            tokenNfa.Terminator.Greediness = greediness;
+
+            AddTokenToNfa(tokenNfa);
+        }
+
+        //TODO: Func<Token, bool> => Predicate<Token>
+        public void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction, Greediness greediness)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
+            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
+            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
+            tokenNfa.Terminator.Greediness = greediness;
+
+            AddTokenToNfa(tokenNfa);
+        }
+
+        public void IgnoreTerminal(RegExp ignoree)
+        {
+            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
+            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
+
+            AddTokenToNfa(tokenNfa);
+        }
+
+        private FiniteAutomata GetTokenNfa(RegExp regExp)
+        {
+            FiniteAutomata tokenNfa = regExp.AsNFA();
+            tokenNfa.Terminator.IsAccepting = true;
+            tokenNfa.Terminator.TokenClass = mClassIdProvider.GetNext();
+
+            return tokenNfa;
         }
 
         public Terminal UseEpsilon()
@@ -61,11 +126,6 @@ namespace Scopus.LexicalAnalysis
         public int TotalTokensCount
         {
             get { return mTotalTokensCount; }
-        }
-
-        public void SetEncoding(Encoding encoding)
-        {
-            mEncoding = encoding;
         }
 
         public void BuildTransitions()
@@ -90,10 +150,20 @@ namespace Scopus.LexicalAnalysis
                 TokensClasses[tokensCount] = tokenClass;
                 TokensLengths[tokensCount] = tokenLength;
 
+                Func<Token, bool> lexicalAction;
+                bool lexicalActionResult = true; // Indicates whether the token has been passed to parser (not ignored)
+                if (mLexicalActions.TryGetValue(tokenClass, out lexicalAction))
+                {
+                    var token = new Token(buffer, i, tokenLength) {Class = tokenClass};
+                    lexicalActionResult = lexicalAction(token);
+                }
+
                 i += tokenLength;
 
-                if (!mIgnoredTokens.Contains(tokenClass))
-                    tokensCount++;
+                // In case the terminal is ignored OR has been ignored by lexicalAction, don't count it (don't pass it 
+                // to parser)
+                if (mIgnoredTokens.Contains(tokenClass) || !lexicalActionResult) continue;
+                tokensCount++;
             }
 
             mTotalTokensCount += tokensCount;

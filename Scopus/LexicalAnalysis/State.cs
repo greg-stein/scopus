@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Scopus.LexicalAnalysis
 {
     [Serializable]
+    [DebuggerDisplay("Name = {Name}, Id = {Id}")]
     internal class State
     {
         internal readonly Dictionary<InputChar, List<State>> Transitions =
@@ -19,14 +21,13 @@ namespace Scopus.LexicalAnalysis
         internal bool IsAccepting { get; set; } // Indicates whether the state is accepting
         internal int TokenClass { get; set; } // Determines class of accepted token (in case IsAccepting==true)
         internal int Id { get; set; } // Id of state for TransitionFunctionImplementation
+        internal Greediness Greediness { get; set; } // Indicates whether to accept first match (in case IsAccepting==true)
 
         /// <summary>
         /// Lexical action, performed when token is accepted. The return value is indicator that 
         /// determines whether to pass the token to parser or ignore it. The return value overrides
         /// UseTerminal() and IgnoreTerminal() methods of Lexer.
         /// </summary>
-        // TODO: Support it in Tokenizer/TransitionFunction
-        internal Func<Token, bool> LexicalAction { get; set; } 
 
         /// <summary>
         /// Adds transition to given state on input char
@@ -36,6 +37,8 @@ namespace Scopus.LexicalAnalysis
         internal void AddTransitionTo(State state, InputChar iChar)
         {
             List<State> states;
+
+            if (state == null) return;
 
             if (Transitions.TryGetValue(iChar, out states))
             {

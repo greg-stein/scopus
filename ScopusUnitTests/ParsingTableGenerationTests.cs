@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text;
 using NUnit.Framework;
 using Scopus.LexicalAnalysis;
 using Scopus.LexicalAnalysis.Algorithms;
@@ -33,7 +32,6 @@ namespace ScopusUnitTests
 
             tokenizer = new RegExpTokenizer();
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);            
 
             id = tokenizer.UseTerminal(RegExp.GetNumberRegExp());
             plus = tokenizer.UseTerminal(RegExp.Literal('+'));

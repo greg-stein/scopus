@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
@@ -45,10 +44,35 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                 }
                 // Assign last transition to Terminator for everyone
                 inputChar = InputChar.For(bytes[bytes.Length - 1]);
-                state.Transitions.Add(inputChar, new List<State> { nfa.Terminator });
+                state.AddTransitionTo(nfa.Terminator, inputChar);
             }
 
             return nfa;
+        }
+
+        public bool Equals(RangeRegExp rangeRegExp)
+        {
+            if (!base.Equals(rangeRegExp)) return false;
+
+            if (rangeRegExp.mRight != mRight || rangeRegExp.mLeft != mLeft) return false;
+
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var rangeRegExp = obj as RangeRegExp;
+            if (rangeRegExp != null)
+                return Equals(rangeRegExp);
+
+            return false;
+        }
+
+        public override string ToString()
+        {
+            return "[" + mLeft + "-" + mRight + "]";
         }
     }
 }

@@ -9,6 +9,7 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         private AugmentedGrammar mG;
         private List<ItemSet[]> mAutomatonGraphTable;
         private LRParsingTable parsingTable;
+        private int mUsedTokensNumber;
 
         internal Dictionary<ItemSet, ItemSet> ItemSets { get; private set; }
         internal List<ItemSet> ItemSetsList { get; private set; }
@@ -21,6 +22,12 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
             ItemSets = new Dictionary<ItemSet, ItemSet>();
             ItemSetsList = new List<ItemSet>();
             parsingTable = new LRParsingTable();
+        }
+
+        public SLRParsingTableBuilder(int usedTokensNumber)
+            : this()
+        {
+            this.mUsedTokensNumber = usedTokensNumber;
         }
 
         internal SLRParsingTableBuilder(ActionTableEntry[,] actionTable, int[,] gotoTable) : this()
@@ -219,8 +226,8 @@ namespace Scopus.SyntaxAnalysis.ParsingTables
         private void BuildActionTable()
         {
             // this routine humbly expects that token ID provider will always be the simpliest one (next ID = ID++)
-            parsingTable.ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count, mG.UsedTerminals.Count];
-                //mG.UsedTerminals.Count];
+            var usedTokensNumber = Math.Max(mUsedTokensNumber, mG.UsedTerminals.Count) + 1; // First token gets ID=1
+            parsingTable.ActionTable = new ActionTableEntry[mAutomatonGraphTable.Count, usedTokensNumber];// mG.UsedTerminals.Count];
             int stateID;
 
             // shift action is a first priority

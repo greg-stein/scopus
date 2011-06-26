@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Scopus.Auxiliary;
 
 namespace Scopus.LexicalAnalysis.Algorithms
 {
@@ -54,7 +55,19 @@ namespace Scopus.LexicalAnalysis.Algorithms
             DefineAcceptingStates(dStates);
             var dfa = new FiniteAutomata("DFA") {StartState = startState};
 
+            AssignIdsToStates(dfa);
             return dfa;
+        }
+
+        private static void AssignIdsToStates(FiniteAutomata automata)
+        {
+            var idProvider = new IDProvider();
+
+            var states = automata.GetStates();
+            foreach (var state in states)
+            {
+                state.Id = idProvider.GetNext();
+            }
         }
 
         /// <summary>

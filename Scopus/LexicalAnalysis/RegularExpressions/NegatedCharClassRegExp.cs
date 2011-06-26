@@ -272,5 +272,30 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             nfa.Terminator.IsAccepting = true;
             return nfa;
         }
+
+        public bool Equals(NegatedCharClassRegExp negatedCharClassRegExp)
+        {
+            if (!base.Equals(negatedCharClassRegExp)) return false;
+
+            if (negatedCharClassRegExp.mLiterals.Length != mLiterals.Length) return false;
+
+            for (int i = 0; i < mLiterals.Length; i++)
+            {
+                if (mLiterals[i] != negatedCharClassRegExp.mLiterals[i]) return false;
+            }
+
+            return true;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var negatedCharClassRegExp = obj as NegatedCharClassRegExp;
+            if (negatedCharClassRegExp != null)
+                return Equals(negatedCharClassRegExp);
+
+            return false;
+        }
     }
 }

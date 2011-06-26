@@ -1,4 +1,4 @@
-﻿using System.Text;
+﻿using System;
 using Scopus.LexicalAnalysis.Algorithms;
 using Scopus.LexicalAnalysis.RegularExpressions;
 using Scopus.SyntaxAnalysis;
@@ -10,13 +10,11 @@ namespace Scopus.LexicalAnalysis
     /// </summary>
     public interface ITokenizer
     {
-        // todo: should be removed!!! CLARIFY THIS!!!!
         /// <summary>
         /// Gets or sets array containing tokens' indices.
         /// </summary>
         int[] TokensIndices { get; set; }
 
-        // todo: should be removed!!! THIS ALSO!!!
         /// <summary>
         /// Gets or sets array containing tokens' classes (types).
         /// </summary>
@@ -42,9 +40,41 @@ namespace Scopus.LexicalAnalysis
         /// <summary>
         /// Tells tokenizer to recognize given pattern as terminal and pass it to Parser
         /// </summary>
-        /// <param name="terminal">Regular expression representing terminal</param>
+        /// <param name="regExp">Regular expression representing terminal</param>
         /// <returns>Terminal variable for using in a production rules</returns>
-        Terminal UseTerminal(RegExp terminal);
+        Terminal UseTerminal(RegExp regExp);
+
+        /// <summary>
+        /// Tells tokenizer to recognize given pattern as terminal and pass it to Parser. This overloaded methos allows also 
+        /// set a lexical action that will be performed when the given pattern has match
+        /// </summary>
+        /// <param name="regExp">Regular expression representing terminal</param>
+        /// <param name="lexicalAction">Lexical action that will be performed if given token is recognized. Lexical action 
+        /// may return boolean value that indicates whether recognized token should be used or not (ignored)</param>
+        /// <returns></returns>
+        Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction);
+
+        /// <summary>
+        /// Tells tokenizer to recognize given pattern as terminal and pass it to Parser. This overloaded methos allows also 
+        /// set a lexical action that will be performed when the given pattern has match
+        /// </summary>
+        /// <param name="regExp">Regular expression representing terminal</param>
+        /// <param name="greediness">If greediness is set to LazyQuantification, first possible match will be returned during 
+        /// analysis of the input. If greediness is set to GreedyQuantification (default), last possible match will be returned.</param>
+        /// <returns></returns>
+        Terminal UseTerminal(RegExp regExp, Greediness greediness);
+
+        /// <summary>
+        /// Tells tokenizer to recognize given pattern as terminal and pass it to Parser. This overloaded methos allows also 
+        /// set a lexical action that will be performed when the given pattern has match
+        /// </summary>
+        /// <param name="regExp">Regular expression representing terminal</param>
+        /// <param name="lexicalAction">Lexical action that will be performed if given token is recognized. Lexical action 
+        /// may return boolean value that indicates whether recognized token should be used or not (ignored)</param>
+        /// <param name="greediness">If greediness is set to LazyQuantification, first possible match will be returned during 
+        /// analysis of the input. If greediness is set to GreedyQuantification (default), last possible match will be returned.</param>
+        /// <returns></returns>
+        Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction, Greediness greediness);
 
         /// <summary>
         /// Tells tokenizer to recognize given pattern and DO NOT pass it to Parser. Using this method
@@ -54,16 +84,41 @@ namespace Scopus.LexicalAnalysis
         void IgnoreTerminal(RegExp ignoree);
 
         /// <summary>
+        /// Tells tokenizer to recognize given pattern and DO NOT pass it to Parser. Using this method
+        /// it is possible to implement a filtering preprocessor.
+        /// </summary>
+        /// <param name="ignoree">Regular expression represening pattern to ignore.</param>
+        /// <param name="lexicalAction">Lexical action that will be performed if given token is recognized. Lexical action 
+        /// may return boolean value that indicates whether recognized token should be used or not (ignored).
+        /// When this method is used to specify token, if the lexical action will return true the token will still be ignored</param>
+        void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction);
+
+        /// <summary>
+        /// Tells tokenizer to recognize given pattern and DO NOT pass it to Parser. Using this method
+        /// it is possible to implement a filtering preprocessor.
+        /// </summary>
+        /// <param name="ignoree">Regular expression represening pattern to ignore.</param>
+        /// <param name="greediness">If greediness is set to LazyQuantification, first possible match will be returned during 
+        /// analysis of the input. If greediness is set to GreedyQuantification (default), last possible match will be returned.</param>
+        void IgnoreTerminal(RegExp ignoree, Greediness greediness);
+
+        /// <summary>
+        /// Tells tokenizer to recognize given pattern and DO NOT pass it to Parser. Using this method
+        /// it is possible to implement a filtering preprocessor.
+        /// </summary>
+        /// <param name="ignoree">Regular expression represening pattern to ignore.</param>
+        /// <param name="lexicalAction">Lexical action that will be performed if given token is recognized. Lexical action 
+        /// may return boolean value that indicates whether recognized token should be used or not (ignored).
+        /// When this method is used to specify token, if the lexical action will return true the token will still be ignored</param>
+        /// <param name="greediness">If greediness is set to LazyQuantification, first possible match will be returned during 
+        /// analysis of the input. If greediness is set to GreedyQuantification (default), last possible match will be returned.</param>
+        void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction, Greediness greediness);
+
+        /// <summary>
         /// Returns special terminal representing an epsilon (empty word) for use within production rules.
         /// </summary>
         /// <returns>Special terminal symbol representing epsiilon (empty word)</returns>
         Terminal UseEpsilon();
-
-        /// <summary>
-        /// Sets encoding. No default value is defined, hence calling this method before tokenizing is mandatory.
-        /// </summary>
-        /// <param name="encoding">Encoding for tokenizing</param>
-        void SetEncoding(Encoding encoding);
 
         /// <summary>
         /// Builds transition using previously set transition function. If no transition function is set, this method

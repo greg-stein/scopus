@@ -17,7 +17,7 @@ namespace Scopus
 
         public static LRParser GetSLRParser(AugmentedGrammar grammar, Lexer lexer)
         {
-            var parsingTableBuilder = new SLRParsingTableBuilder();
+            var parsingTableBuilder = new SLRParsingTableBuilder(lexer.TokensNumber);
             parsingTableBuilder.SetGrammar(grammar);
             parsingTableBuilder.ConstructParsingTable();
             var parser = new LRParser

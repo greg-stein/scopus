@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Scopus.LexicalAnalysis;
 
 namespace Scopus.SyntaxAnalysis
@@ -25,6 +26,7 @@ namespace Scopus.SyntaxAnalysis
                 if (mPoppedTokensCount < mPopableTokensCount)
                 {
                     int stackPeek = mTokens.Count - 1;
+                    // TODO: Check whether it's enough to reverse this loop
                     for (int i = stackPeek; i >= 0; i--)
                     {
                         if (stackPeek - mPopableTokensCount == i)

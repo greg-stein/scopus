@@ -10,12 +10,16 @@ namespace ScopusUnitTests
     [TestFixture]
     public class TokenizerTests
     {
+        private static
+            object[] Encodings = {Encoding.ASCII, Encoding.BigEndianUnicode, Encoding.Unicode, Encoding.UTF32, Encoding.UTF8};
+        
+        [TestCaseSource("Encodings")]
         [Test]
-        public void DoesTokenizationWorksAtAll()
+        public void DoesTokenizationWorksAtAll(Encoding encoding)
         {
             // Indices:             01234567890123456
             const string SOURCE = @"lexem123ley,6.7&#";
-            var buffer = Encoding.ASCII.GetBytes(SOURCE);
+            var buffer = encoding.GetBytes(SOURCE);
             var lexemes = new[] { "lexem", "123", "ley", ",", "6", ".", "7", "&", "#" };
 
             int[] tokensIndices = new int[SOURCE.Length + 1];
@@ -30,19 +34,16 @@ namespace ScopusUnitTests
                                 };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);            
-            Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s)));
+            Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s, encoding)));
             tokenizer.BuildTransitions();
 
-            var lastTokenIndex = tokenizer.Tokenize(buffer, 0, SOURCE.Length);
+            var lastTokenIndex = tokenizer.Tokenize(buffer, 0, buffer.Length);
 
             Assert.That(lastTokenIndex + 1 == lexemes.Length); // correct #tokens?
             // Check whether each token has been recognized correctly
             for (int i = 0; i < lastTokenIndex; i++)
             {
-                int tokenIndex = tokensIndices[i];
-                var tokenValue = Encoding.ASCII.GetString(buffer, tokenIndex,
-                    tokensIndices[i + 1] - tokenIndex);
+                var tokenValue = encoding.GetString(buffer, tokensIndices[i], tokenLengths[i]);
 
                 Assert.AreEqual(lexemes[i], tokenValue);
             }
@@ -66,7 +67,6 @@ namespace ScopusUnitTests
                                 };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);            
 
             tokenizer.UseTerminal(RegExp.Literal("aab")); // class 1
             tokenizer.UseTerminal(RegExp.Literal("acb")); // class 2
@@ -105,7 +105,6 @@ namespace ScopusUnitTests
                                 };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);
 
             tokenizer.UseTerminal(RegExp.Literal("windows"));  // class: 1
             tokenizer.UseTerminal(RegExp.Literal("."));        // class: 2
@@ -160,7 +159,6 @@ namespace ScopusUnitTests
             };
 
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);
 
             tokenizer.UseTerminal(RegExp.Choice(
                 RegExp.Literal("windows"),
@@ -197,6 +195,72 @@ namespace ScopusUnitTests
             Assert.That(tokensClasses[5] == 1);
             Assert.That(tokensClasses[6] == 1);
             Assert.That(tokensClasses[7] == 1);
+        }
+
+        [Test]
+        public void LexicalActionTest()
+        {
+            // Classes              2 13 14 15
+            // Indices              01234567890
+            const string SOURCE = @"aa bb cc dd";
+            var buffer = Encoding.ASCII.GetBytes(SOURCE);
+
+            int[] tokensIndices = new int[SOURCE.Length];
+            int[] tokensClasses = new int[SOURCE.Length];
+            int[] tokenLengths = new int[SOURCE.Length];
+
+            var tokenizer = new RegExpTokenizer()
+            {
+                TokensClasses = tokensClasses,
+                TokensIndices = tokensIndices,
+                TokensLengths = tokenLengths
+            };
+
+            tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
+            var lexicalActionExecuted = false;
+            Token tokenBB=null, tokenCC=null;
+
+            tokenizer.UseTerminal(RegExp.Literal(" "));  // class 1
+            tokenizer.UseTerminal(RegExp.Literal("aa")); // class 2
+            tokenizer.UseTerminal(RegExp.Literal("bb"), (t) =>
+                                                            {
+                                                                tokenBB = t;
+                                                                lexicalActionExecuted = true;
+                                                                return true; // Pass this token to parser
+                                                            });
+
+            tokenizer.UseTerminal(RegExp.Literal("cc"), (t) =>
+                                                            {
+                                                                tokenCC = t;
+                                                                lexicalActionExecuted &= true;
+                                                                return false; // Ignore token
+                                                            });
+
+            tokenizer.UseTerminal(RegExp.Literal("dd")); 
+
+            tokenizer.BuildTransitions();
+
+            var tokensCount = tokenizer.Tokenize(buffer, 0, SOURCE.Length) + 1;
+
+            Assert.That(tokenBB.Buffer == buffer);
+            Assert.That(tokenBB.Offset, Is.EqualTo(3));
+            Assert.That(tokenBB.Class, Is.EqualTo(3));
+            Assert.That(tokenBB.Length, Is.EqualTo(2));
+
+            Assert.That(tokenCC.Buffer == buffer);
+            Assert.That(tokenCC.Offset, Is.EqualTo(6));
+            Assert.That(tokenCC.Class, Is.EqualTo(4));
+            Assert.That(tokenCC.Length, Is.EqualTo(2));
+
+            Assert.True(lexicalActionExecuted, "The lexical actions were not executed partially or at all");
+
+            Assert.That(tokensCount, Is.EqualTo(6));
+            Assert.That(tokensClasses[0], Is.EqualTo(2));
+            Assert.That(tokensClasses[1], Is.EqualTo(1));
+            Assert.That(tokensClasses[2], Is.EqualTo(3));
+            Assert.That(tokensClasses[3], Is.EqualTo(1));
+            Assert.That(tokensClasses[4], Is.EqualTo(1));
+            Assert.That(tokensClasses[5], Is.EqualTo(5));
         }
     }
 }

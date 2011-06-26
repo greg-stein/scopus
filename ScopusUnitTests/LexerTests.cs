@@ -29,7 +29,6 @@ namespace ScopusUnitTests
             
             tokenizer = new RegExpTokenizer();
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);
             Array.ForEach(lexemes, (s) => tokenizer.UseTerminal(RegExp.Literal(s)));
             tokenizer.BuildTransitions();
 

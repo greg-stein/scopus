@@ -5,6 +5,7 @@ using NUnit.Framework;
 using Scopus.LexicalAnalysis;
 using Scopus.LexicalAnalysis.Algorithms;
 using Scopus.LexicalAnalysis.RegularExpressions;
+using ScopusUnitTests.Common;
 
 namespace ScopusUnitTests
 {
@@ -26,7 +27,7 @@ namespace ScopusUnitTests
             nfa.Terminator.TokenClass = 5; // Token ID
             var dfa = NFAToDFAConverter.Convert(nfa);
 
-            var accState = Simulate(dfa.StartState, CODE_A);
+            var accState = dfa.StartState.Simulate(inputChars: CODE_A);
 
             Assert.That(accState.IsAccepting);
             Assert.That(accState.TokenClass, Is.EqualTo(5));
@@ -38,7 +39,7 @@ namespace ScopusUnitTests
             RegExp re = RegExp.Literal('a');
             var dfa = NFAToDFAConverter.Convert(re.AsNFA(true));
 
-            Assert.True(Simulate(0, dfa.StartState, CODE_A).IsAccepting);
+            Assert.True(dfa.StartState.Simulate(0, CODE_A).IsAccepting);
         }
 
         [Test]
@@ -51,7 +52,7 @@ namespace ScopusUnitTests
 
             var str = new byte?[] { CODE_A, CODE_B, CODE_C, CODE_A };
 
-            Assert.True(Simulate(0, dfa.StartState, str).IsAccepting);
+            Assert.True(dfa.StartState.Simulate(0, str).IsAccepting);
         }
 
         [Test]
@@ -66,16 +67,16 @@ namespace ScopusUnitTests
 
             var dfa = NFAToDFAConverter.Convert(nfa);
 
-            var state = Simulate(dfa.StartState, CODE_A, CODE_A, CODE_A);
+            var state = dfa.StartState.Simulate(0, CODE_A, CODE_A, CODE_A);
             Assert.That(state.IsAccepting);
 
-            state = Simulate(dfa.StartState, CODE_A, CODE_A, CODE_B);
+            state = dfa.StartState.Simulate(0, CODE_A, CODE_A, CODE_B);
             Assert.That(state.IsAccepting);
 
-            state = Simulate(dfa.StartState, CODE_A);
+            state = dfa.StartState.Simulate(0, CODE_A);
             Assert.That(state.IsAccepting);
 
-            state = Simulate(dfa.StartState, CODE_B);
+            state = dfa.StartState.Simulate(0, CODE_B);
             Assert.That(state.IsAccepting);
         }
 
@@ -100,7 +101,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Literal(LITERAL);
             var nfa = regExp.AsNFA(true);
 
-            var terminator = Simulate(nfa.StartState,
+            var terminator = nfa.StartState.Simulate(0, 
                 (byte) 'a', (byte) 'b', (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f');
 
             Assert.That(terminator, Is.EqualTo(nfa.Terminator));
@@ -118,7 +119,7 @@ namespace ScopusUnitTests
             var nfa = regExp.AsNFA(true);
 
             var charCodes = Encoding.Unicode.GetBytes(LITERAL);
-            var terminator = Simulate(nfa.StartState, charCodes[0], charCodes[1], charCodes[2], charCodes[3], charCodes[4], charCodes[5], 
+            var terminator = nfa.StartState.Simulate(0, charCodes[0], charCodes[1], charCodes[2], charCodes[3], charCodes[4], charCodes[5], 
                 charCodes[6], charCodes[7], charCodes[8], charCodes[9], charCodes[10], charCodes[11]);
 
             Assert.That(terminator, Is.EqualTo(nfa.Terminator));
@@ -131,7 +132,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Sequence(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, CODE_A, null, CODE_B), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(0, CODE_A, null, CODE_B), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -140,8 +141,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.Choice(RegExp.Literal('a'), RegExp.Literal('b'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, nfa.StartState, null, CODE_B, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(1, null, CODE_B, null), Is.EqualTo(nfa.Terminator));
         }
         
         [Test]
@@ -150,8 +151,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.Optional(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, nfa.StartState, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(1, null), Is.EqualTo(nfa.Terminator));
         }
 
         [Test]
@@ -160,9 +161,9 @@ namespace ScopusUnitTests
             var regExp = RegExp.AnyNumberOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, nfa.StartState, new byte?[] { null }), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A), null), Is.EqualTo(Simulate(nfa.StartState, (byte?)null)));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A, null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(1, new byte?[] { null }), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A).Simulate(1, null), Is.EqualTo(nfa.StartState.Simulate(0, (byte?)null)));
         }
 
         [Test]
@@ -171,9 +172,8 @@ namespace ScopusUnitTests
             var regExp = RegExp.AtLeastOneOf(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            Assert.That(Simulate(nfa.StartState, null, CODE_A, null, CODE_A, null), Is.EqualTo(Simulate(nfa.StartState, null, CODE_A, null)));
-            Assert.That(Simulate(nfa.StartState, null, CODE_A, null, null), Is.EqualTo(nfa.Terminator));
-            Assert.That(Simulate(1, Simulate(nfa.StartState, null, CODE_A, null, CODE_A), null), Is.EqualTo(nfa.Terminator));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A, null, CODE_A, null), Is.EqualTo(nfa.StartState.Simulate(0, null, CODE_A, null)));
+            Assert.That(nfa.StartState.Simulate(0, null, CODE_A, null, null), Is.EqualTo(nfa.Terminator));
         }
 
         [Test]
@@ -182,7 +182,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Not(RegExp.Literal('a'));
             var nfa = regExp.AsNFA();
 
-            var simulatedState = Simulate(nfa.StartState, CODE_A);
+            var simulatedState = nfa.StartState.Simulate(0, CODE_A);
 
             Assert.That(simulatedState, Is.Not.EqualTo(nfa.Terminator));
             Assert.IsFalse(simulatedState.IsAccepting);
@@ -192,7 +192,7 @@ namespace ScopusUnitTests
             {
                 if (i == CODE_A) continue; // skip 'a' since we have already tested it above
 
-                simulatedState = Simulate(nfa.StartState, (byte) i);
+                simulatedState = nfa.StartState.Simulate(0, (byte)i);
                 Assert.That(simulatedState.IsAccepting);
                 Assert.That(simulatedState, Is.EqualTo(nfa.Terminator));
             }
@@ -204,7 +204,7 @@ namespace ScopusUnitTests
             var regExp = RegExp.Not(RegExp.Literal("abcdef"));
             var nfa = regExp.AsNFA();
 
-            var simulatedState = Simulate(nfa.StartState, CODE_A, CODE_B, CODE_C, CODE_D, CODE_E, CODE_F);
+            var simulatedState = nfa.StartState.Simulate(0, CODE_A, CODE_B, CODE_C, CODE_D, CODE_E, CODE_F);
 
             Assert.That(simulatedState, Is.Not.EqualTo(nfa.Terminator));
             Assert.IsFalse(simulatedState.IsAccepting);
@@ -212,7 +212,7 @@ namespace ScopusUnitTests
 
             for (int i = Byte.MinValue; i <= Byte.MaxValue; i++)
             {
-                simulatedState = Simulate(nfa.StartState, (byte)i);
+                simulatedState = nfa.StartState.Simulate(0, (byte)i);
                 Assert.That(simulatedState.IsAccepting);
             }
 
@@ -220,23 +220,26 @@ namespace ScopusUnitTests
 
             foreach (var word in words)
             {
-                simulatedState = Simulate(nfa.StartState, word);
+                simulatedState = nfa.StartState.Simulate(word);
                 Assert.That(simulatedState.IsAccepting);
             }
         }
 
+        private static
+            object[] TestCases = {
+                                     new object[] {Encoding.ASCII, new[] { 'a', 'b', 'c' } },
+                                     new object[] {Encoding.BigEndianUnicode, new[] { 'a', 'ש', 'я' }},
+                                     new object[] {Encoding.Unicode, new[] { 'a', 'ש', 'я' }}, 
+                                     new object[] {Encoding.UTF32, new[] { 'a', 'ש', 'я' }}, 
+                                     new object[] {Encoding.UTF8, new[] { 'a', 'ש', 'я' }}
+                                 };
+
         // My first Data Driven Unit Test :)
-        //TODO: [TestCase("utf-7", new[] {'a', 'b', 'c'})]
-        [TestCase("utf-16be", new[] { 'a', 'ש', 'я' })]
-        [TestCase("utf-16le", new[] { 'a', 'ש', 'я' })]
-        [TestCase("utf-8", new[] { 'a', 'ש', 'я' })]
-        [TestCase("ascii", new[] { 'a', 'b', 'c' })]
+        // UTF-7 is not byte-aligned and hence is not supported: [TestCase("utf-7", new[] {'a', 'b', 'c'})]
+        [TestCaseSource("TestCases")]
         [Test]
-        public void NegatedCharRegExpConstructionTest(string encodingName, params char[] exceptees)
+        public void NegatedCharRegExpConstructionTest(Encoding encoding, params char[] exceptees)
         {
-            // Since it is impossible to pass Encoding class in attribute parameters, we 
-            // obtain it depending on given string.
-            var encoding = GetEncoding(encodingName);
             var regExp = RegExp.LiteralExcept(encoding, exceptees);
             var nfa = regExp.AsNFA(true);
 
@@ -259,6 +262,15 @@ namespace ScopusUnitTests
             }
         }
 
+        [Test]
+        public void SequenceRegExpMultipleParametersTest()
+        {
+            var regExp = new SequenceRegExp(new LiteralRegExp('a'), new LiteralRegExp('b'), new LiteralRegExp('c'),
+                                            new LiteralRegExp('d'), new LiteralRegExp('e'), new LiteralRegExp('f'));
+
+            //var expectedRE = new SequenceRegExp()
+        }
+
         [TestCase('a', 'ש', "utf-16le")]
         [TestCase('a', 'ש', "utf-16be")]
         [TestCase('a', 'ש', "utf-8")]
@@ -266,10 +278,12 @@ namespace ScopusUnitTests
         [Test]
         public void RangeRegExpConstructionTest(char left, char right, string encodingName)
         {
-            var encoding = GetEncoding(encodingName);
+            var encoding = CommonTestRoutines.GetEncoding(encodingName);
             var regExp = RegExp.Range(left, right, encoding);
             var nfa = regExp.AsNFA(true);
-
+#if TESTDFA
+            var dfa = NFAToDFAConverter.Convert(nfa);
+#endif
             State simulatedState;
             for (int i = 0; i <= char.MaxValue; i++)
             {
@@ -278,37 +292,22 @@ namespace ScopusUnitTests
                 {
                     simulatedState = SimulateNFA(nfa.StartState, bytes);
                     Assert.That(simulatedState.IsAccepting, String.Format("Failed! i = {0} ({1})", i, (char)i));
+#if TESTDFA
+                    simulatedState = SimulateNFA(dfa.StartState, bytes);
+                    Assert.That(simulatedState.IsAccepting, String.Format("Failed! i = {0} ({1})", i, (char)i));
+#endif
                 }
                 else
                 {
-                    Assert.Throws(typeof(SimulationException), () => SimulateNFA(nfa.StartState, bytes));
+                    Assert.Throws(typeof (SimulationException), () => SimulateNFA(nfa.StartState, bytes));
+#if TESTDFA
+                    Assert.Throws(typeof(SimulationException), () => SimulateNFA(dfa.StartState, bytes));
+#endif
                 }
             }
         }
 
-        private static Encoding GetEncoding(string name)
-        {
-            switch (name.ToLower())
-            {
-                case "utf-16le":
-                    return Encoding.Unicode;
-                case "utf-8":
-                    return Encoding.UTF8;
-                case "utf-7":
-                    return Encoding.UTF7;
-                case "utf-16be":
-                    return Encoding.BigEndianUnicode;
-                case "utf-32le":
-                    return Encoding.UTF32;
-                case "ascii":
-                    return Encoding.ASCII;
-
-                default:
-                    return Encoding.Unicode;
-            }
-        }
-
-        private static State SimulateNFA(State transitionToUse, params byte[] inputChars)
+        private static State SimulateNFA(State state, params byte[] inputChars)
         {
             byte?[] nullableBytes = new byte?[inputChars.Length];
 
@@ -317,62 +316,7 @@ namespace ScopusUnitTests
                 nullableBytes[i] = inputChars[i];
             }
 
-            return Simulate(transitionToUse, nullableBytes);
-        }
-
-        private static State Simulate(int transitionToUse, State s, params byte?[] inputChars)
-        {
-            if (inputChars == null)
-                inputChars = new byte?[] {null};
-
-            State currentState = s;
-            foreach (var inputChar in inputChars)
-            {
-                var ic = inputChar == null ? InputChar.Epsilon() : InputChar.For((byte) inputChar);
-                List<State> transitions;
-                if (!currentState.Transitions.TryGetValue(ic, out transitions))
-                    throw new SimulationException("Simulation: no transition for the symbol.");
-
-                if (transitions.Count > transitionToUse)
-                {
-                    currentState = transitions[transitionToUse];
-                }
-                else if (transitions.Count > 0)
-                {
-                    currentState = transitions[0];
-                }
-                else
-                {
-                    throw new SimulationException("Simulation: no transition for the symbol.");
-                }
-            }
-
-            return currentState;
-        }
-
-        private class SimulationException : Exception
-        {
-            public SimulationException(string message)
-                : base(message)
-            {
-            }
-        }
-
-        private static State Simulate(State s, params byte?[] inputChars)
-        {
-            return Simulate(0, s, inputChars);
-        }
-
-        private static State Simulate(State s, string input)
-        {
-            byte[] bytes = Encoding.ASCII.GetBytes(input);
-            State state = s;
-            foreach (var b in bytes)
-            {
-                state = Simulate(state, b);
-            }
-
-            return state;
+            return state.Simulate(0, nullableBytes);
         }
     }
 }

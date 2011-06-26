@@ -16,6 +16,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
         private bool[] mAcceptingStates;
         private int[] mTokenIds;
         private List<int[]> mTransitionsTable;
+        private Greediness[] mGreediness;
 
         #region ITransitionFunction Members
 
@@ -25,6 +26,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
 
             mAcceptingStates = new bool[states.Count];
             mTokenIds = new int[states.Count];
+            mGreediness = new Greediness[states.Count];
             mStateIdProvider.Reset();
 
             // First state should be start state of the DFA
@@ -44,6 +46,7 @@ namespace Scopus.LexicalAnalysis.Algorithms
                 {
                     mAcceptingStates[state.Id] = true;
                     mTokenIds[state.Id] = state.TokenClass;
+                    mGreediness[state.Id] = state.Greediness;
                 }
             }
         }
@@ -53,28 +56,69 @@ namespace Scopus.LexicalAnalysis.Algorithms
             int state = INITIAL_STATE;
             int i;
             tokenClass = -1;
+            int lastAcceptingState = INVALID_STATE;
+            int lastAcceptingPos = 0;
 
             for (i = offset; i < length; i++)
             {
-                int previousState = state;
-                state = mTransitionsTable[state][buffer[i]];
+                state = mTransitionsTable[state][buffer[i]]; // zero-length words are not supported
 
                 if (state == INVALID_STATE)
                 {
-                    if (mAcceptingStates[previousState])
-                    {
-                        tokenClass = mTokenIds[previousState];
-                        break;
-                    }
-                    throw new UnexpectedTokenException(new Token(buffer, offset, i - offset));
+                    if (lastAcceptingState == INVALID_STATE)
+                        throw new UnexpectedTokenException(new Token(buffer, offset, i - offset));
+
+                    tokenClass = mTokenIds[lastAcceptingState];
+                    break;
+                }
+                if (mAcceptingStates[state])
+                {
+                    lastAcceptingState = state;
+                    lastAcceptingPos = i;
+                }
+//                int previousState = state;
+//                state = mTransitionsTable[state][buffer[i]];
+//
+//                if (state == INVALID_STATE)
+//                {
+//                    if (mAcceptingStates[previousState])
+//                    {
+//                        tokenClass = mTokenIds[previousState];
+//                        break;
+//                    }
+//                    throw new UnexpectedTokenException(new Token(buffer, offset, i - offset));
+//                }
+//                if (mAcceptingStates[state] && mGreediness[state] == Greediness.LazyQuantification)
+//                {
+//                    tokenClass = mTokenIds[previousState];
+//                    break;
+//                }
+            }
+
+            // In case end of buffer was reached, check whether it ends with a valid token
+            if (i == length)
+            {
+                // If last visited state is accepting state
+                if (mAcceptingStates[state])
+                {
+                    // Update accepting state and position
+                    lastAcceptingState = state;
+                    lastAcceptingPos = i - 1;
+                }
+
+                // Whether there was at least one accepting state
+                if (lastAcceptingState != INVALID_STATE)
+                {
+                    tokenClass = mTokenIds[lastAcceptingState];
+                    return lastAcceptingPos - offset + 1;
+                }
+                else
+                {
+                    return length - offset;
                 }
             }
 
-            // in case end of buffer was reached, check whether it ends with a valid token
-            if (i == length && mAcceptingStates[state])
-                tokenClass = mTokenIds[state];
-
-            return i - offset; // returns length of token
+            return lastAcceptingPos - offset + 1; // returns length of token
         }
 
         #endregion

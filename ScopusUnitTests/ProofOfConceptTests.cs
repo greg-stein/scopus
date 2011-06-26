@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using NUnit.Framework;
 using Scopus.Exceptions;
 using Scopus.LexicalAnalysis;
@@ -216,7 +215,7 @@ namespace ScopusUnitTests
             var E = new NonTerminal("E");
             var T = new NonTerminal("T");
             var F = new NonTerminal("F");
-
+            
             var id = tokenizer.UseTerminal(RegExp.AtLeastOneOf(RegExp.Choice(
                 RegExp.Literal('0'), RegExp.Literal('1'), RegExp.Literal('2'),
                 RegExp.Literal('3'), RegExp.Literal('4'), RegExp.Literal('5'),
@@ -266,9 +265,8 @@ namespace ScopusUnitTests
             var tokenizer = new RegExpTokenizer();
             tokenizer = new RegExpTokenizer();
             tokenizer.SetTransitionFunction(new TableDrivenTransitionFunction());
-            tokenizer.SetEncoding(Encoding.ASCII);            
 
-            var id = tokenizer.UseTerminal(RegExp.GetNumberRegExp());
+		    var id = tokenizer.UseTerminal(RegExp.GetNumberRegExp());
 			var assign = tokenizer.UseTerminal(RegExp.Literal("="));
 			var deref = tokenizer.UseTerminal(RegExp.Literal("*"));
             

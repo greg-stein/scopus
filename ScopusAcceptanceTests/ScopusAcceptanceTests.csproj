@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4019D109-913D-43E9-A7FE-AD90DBADE664}</ProjectGuid>
+    <ProjectGuid>{5706DC77-00B4-47EC-A5DA-89B23A6B86DA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ScopusUnitTests</RootNamespace>
-    <AssemblyName>ScopusUnitTests</AssemblyName>
+    <RootNamespace>ScopusAcceptanceTests</RootNamespace>
+    <AssemblyName>ScopusAcceptanceTests</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -36,22 +36,19 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\bin\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <PlatformTarget>x86</PlatformTarget>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
@@ -70,26 +67,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AuxiliaryTests.cs" />
-    <Compile Include="Common\CommonTestRoutines.cs" />
-    <Compile Include="CrossAutomataLazyQuantificationTests.cs" />
-    <Compile Include="FiniteAutomatonTests.cs" />
-    <Compile Include="LexerEncodingTests.cs" />
-    <Compile Include="LexerTests.cs" />
-    <Compile Include="NFAToDFAConverterTests.cs" />
-    <Compile Include="ParserInterfaceTests.cs" />
-    <Compile Include="ParsingTableGenerationTests.cs" />
-    <Compile Include="PerformanceComparisonTests.cs" />
-    <Compile Include="ProofOfConceptTests.cs" />
-    <Compile Include="RegExpOrganizerTests.cs" />
-    <Compile Include="RegExpSyntaxTreeTests.cs" />
-    <Compile Include="RegExpTokenizerTests.cs" />
-    <Compile Include="SimulateNfaAspect.cs" />
-    <Compile Include="TableDrivenTransitionTests.cs" />
-    <Compile Include="TokenizerTests.cs" />
+    <Compile Include="MotekParser.cs" />
+    <Compile Include="SimpleLexerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ScopusUnitTests\ScopusUnitTests.csproj">
+      <Project>{4019D109-913D-43E9-A7FE-AD90DBADE664}</Project>
+      <Name>ScopusUnitTests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Scopus\Scopus.csproj">
       <Project>{93892691-AB88-4FE8-9F33-ED5BC8FEFAD5}</Project>
       <Name>Scopus</Name>
@@ -112,7 +98,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

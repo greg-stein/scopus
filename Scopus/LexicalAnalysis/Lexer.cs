@@ -14,7 +14,6 @@ namespace Scopus.LexicalAnalysis
         private const int DEFAULT_BUFFER_SIZE = 64*PAGE_SIZE;
         private const int DEFAULT_LEXEME_BUFFER_SIZE = PAGE_SIZE;
         private Encoding encoding = Encoding.ASCII;
-
         private bool mBufferIsFull;
         private BufferedStream mDataSource;
         private int mLastLexemePos;
@@ -23,7 +22,7 @@ namespace Scopus.LexicalAnalysis
         private RegExpParser regexpParser;
         private RegExpNotation mNotation;
         private RegExpParser mRegexpParser;
-
+        private int tokensNumber = 0;
 
         public Lexer(ITokenizer tokenizer)
         {
@@ -68,6 +67,12 @@ namespace Scopus.LexicalAnalysis
                 mRegexpParser = RegExpParser.GetParser(mNotation);
             }
         }
+
+        public int TokensNumber
+        {
+            get { return tokensNumber; }
+        }
+
         public ITokenizer Tokenizer
         {
             get { return mTokenizer; }
@@ -77,7 +82,6 @@ namespace Scopus.LexicalAnalysis
                 mTokenizer.TokensClasses = TokensClasses;
                 mTokenizer.TokensIndices = TokensIndices;
                 mTokenizer.TokensLengths = TokensLengths;
-                mTokenizer.SetEncoding(encoding);
             }
         }
 
@@ -89,7 +93,9 @@ namespace Scopus.LexicalAnalysis
         public void SetEncoding(Encoding encoding)
         {
             this.encoding = encoding;
-            if (Tokenizer != null) Tokenizer.SetEncoding(encoding);
+            if (Tokenizer != null)
+            {
+            }
         }
 
         public void Initialize()
@@ -102,30 +108,108 @@ namespace Scopus.LexicalAnalysis
             return mTokenizer.UseEpsilon();
         }
 
+        [Obsolete("This method will be replaced by one that parses regular expressions")]
+        public Terminal UseTerminal(RegExp regExp)
+        {
+            tokensNumber++;
+            return mTokenizer.UseTerminal(regExp);
+        }
+
+        [Obsolete("This method will be replaced by one that parses regular expressions")]
+        public void IgnoreTerminal(RegExp regExp)
+        {
+            tokensNumber++;
+            mTokenizer.IgnoreTerminal(regExp);
+        }
+
         public Terminal UseTerminal(string regexp)
         {
+            tokensNumber++;
             var regExpObj = mRegexpParser.Parse(regexp);
             return mTokenizer.UseTerminal(regExpObj);
         }
 
         public Terminal UseTerminal(string regexp, RegExpNotation notation)
         {
+            tokensNumber++;
             RegExpNotation = notation;
             var regExpObj = mRegexpParser.Parse(regexp);
             return mTokenizer.UseTerminal(regExpObj);
         }
 
+        public Terminal UseTerminal(string regexp, Func<Token, bool> lexicalAction)
+        {
+            tokensNumber++;
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj, lexicalAction);
+        }
+
+        public Terminal UseTerminal(string regexp, Greediness greediness)
+        {
+            tokensNumber++;
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj, greediness);
+        }
+
+        public Terminal UseTerminal(string regexp, RegExpNotation notation, Func<Token, bool> lexicalAction)
+        {
+            tokensNumber++;
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj, lexicalAction);
+        }
+
+        public Terminal UseTerminal(string regexp, RegExpNotation notation, Func<Token, bool> lexicalAction, Greediness greediness)
+        {
+            tokensNumber++;
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(regexp);
+            return mTokenizer.UseTerminal(regExpObj, lexicalAction, greediness);
+        }
+
         public void IgnoreTerminal(string ignoree)
         {
+            tokensNumber++;
             var regExpObj = mRegexpParser.Parse(ignoree);
             mTokenizer.IgnoreTerminal(regExpObj);
         }
 
         public void IgnoreTerminal(string ignoree, RegExpNotation notation)
         {
+            tokensNumber++;
             RegExpNotation = notation;
             var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.UseTerminal(regExpObj);
+            mTokenizer.IgnoreTerminal(regExpObj);
+        }
+
+        public void IgnoreTerminal(string ignoree, Greediness greediness)
+        {
+            tokensNumber++;
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.IgnoreTerminal(regExpObj, greediness);
+        }
+
+        public void IgnoreTerminal(string ignoree, Func<Token, bool> lexicalAction)
+        {
+            tokensNumber++;
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.IgnoreTerminal(regExpObj, lexicalAction);
+        }
+
+        public void IgnoreTerminal(string ignoree, RegExpNotation notation, Func<Token, bool> lexicalAction)
+        {
+            tokensNumber++;
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.IgnoreTerminal(regExpObj, lexicalAction);
+        }
+
+        public void IgnoreTerminal(string ignoree, RegExpNotation notation, Func<Token, bool> lexicalAction, Greediness greediness)
+        {
+            tokensNumber++;
+            RegExpNotation = notation;
+            var regExpObj = mRegexpParser.Parse(ignoree);
+            mTokenizer.IgnoreTerminal(regExpObj, lexicalAction, greediness);
         }
 
         public void SetDataSource(Stream stream)
@@ -161,7 +245,7 @@ namespace Scopus.LexicalAnalysis
         private void AllocateBuffers()
         {
             Buffer = new byte[BufferSize];
-            TokensIndices = new int[BufferSize + 1]; // 1 for setting last non existing lexeme index
+            TokensIndices = new int[BufferSize];
             TokensClasses = new int[BufferSize];
             TokensLengths = new int[BufferSize];
         }

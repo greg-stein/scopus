@@ -31,6 +31,8 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
                     Alternative2 = new AlternationRegExp(Alternative2, alternatives[i]);
                 }
             }
+
+            ChildExpressions = new[] { Alternative1, Alternative2 };
         }
 
         internal RegExp Alternative1 { get; set; }
@@ -51,7 +53,33 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
 
         public override string ToString()
         {
-            return "(" + Alternative1 + " | " + Alternative2 + ")";
+            return Alternative1 + " | " + Alternative2;
+        }
+
+        public bool Equals(AlternationRegExp alternationRegExp)
+        {
+            if (!base.Equals(alternationRegExp)) return false;
+
+            if (alternationRegExp.Alternative1.Equals(Alternative1) && alternationRegExp.Alternative2.Equals(Alternative2) ||
+                alternationRegExp.Alternative1.Equals(Alternative2) && alternationRegExp.Alternative2.Equals(Alternative1))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) return base.Equals(obj);
+
+            var alternationRegExp = obj as AlternationRegExp;
+            if (alternationRegExp != null)
+                return Equals(alternationRegExp);
+
+            return false;
         }
     }
 }
