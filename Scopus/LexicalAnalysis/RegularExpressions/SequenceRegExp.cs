@@ -1,63 +1,59 @@
 ﻿using System;
+using System.Text;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
 {
     internal class SequenceRegExp : RegExp
     {
-        internal SequenceRegExp(RegExp regExp1, RegExp regExp2)
-        {
-            RegExp1 = regExp1;
-            RegExp2 = regExp2;
-            ChildExpressions = new[] {regExp1, regExp2};
-        }
-
         internal SequenceRegExp(params RegExp[] regExps)
         {
             if (regExps.Length < 2) throw new ArgumentException("regExps");
 
-            RegExp1 = regExps[0];
-            if (regExps.Length == 2)
-            {
-                RegExp2 = regExps[1];
-            }
-            else
-            {
-                RegExp2 = new SequenceRegExp(regExps[1], regExps[2]);
-                for (int i = 3; i < regExps.Length; i++)
-                {
-                    RegExp2 = new SequenceRegExp(RegExp2, regExps[i]);
-                }
-            }
-
-            ChildExpressions = new[] {RegExp1, RegExp2};
+            ChildExpressions = regExps;
         }
-
-        internal RegExp RegExp1 { get; set; }
-        internal RegExp RegExp2 { get; set; }
 
         internal override FiniteAutomata AsNFA()
         {
             var nfa = new FiniteAutomata("SequenceRegExpNFA", false);
-            FiniteAutomata regExp1AsNFA = RegExp1.AsNFA();
-            FiniteAutomata regExp2AsNFA = RegExp2.AsNFA();
-            nfa.StartState = regExp1AsNFA.StartState;
-            nfa.Terminator = regExp2AsNFA.Terminator;
-            regExp1AsNFA.Terminator.AddTransitionTo(regExp2AsNFA.StartState, InputChar.Epsilon());
+            var startNFA = ChildExpressions[0].AsNFA();                         // First RegExp Nfa
+            var endNFA = ChildExpressions[ChildExpressions.Length - 1].AsNFA(); // Last RegExp Nfa
+            nfa.StartState = startNFA.StartState;
+            nfa.Terminator = endNFA.Terminator;
+
+            State lastAddedTerminator = startNFA.Terminator;
+
+            for (int i = 1; i < ChildExpressions.Length - 1; i++)
+            {
+                var newNfa = ChildExpressions[i].AsNFA();
+                lastAddedTerminator.AddTransitionTo(newNfa.StartState, InputChar.Epsilon());
+                lastAddedTerminator = newNfa.Terminator;
+            }
+            lastAddedTerminator.AddTransitionTo(endNFA.StartState, InputChar.Epsilon());
 
             return nfa;
         }
 
         public override string ToString()
         {
-            return RegExp1 + RegExp2.ToString();
+            var builder = new StringBuilder();
+            foreach (var regExp in ChildExpressions)
+            {
+                builder.Append(regExp);
+            }
+
+            return builder.ToString();
         }
 
         public bool Equals(SequenceRegExp sequenceRegExp)
         {
             if (!base.Equals(sequenceRegExp)) return false;
 
-            if (sequenceRegExp.RegExp1.Equals(RegExp1)) return false;
-            if (sequenceRegExp.RegExp2.Equals(RegExp2)) return false;
+            if (ChildExpressions.Length != sequenceRegExp.ChildExpressions.Length) return false;
+
+            for (int i = 0; i < ChildExpressions.Length; i++)
+            {
+                if (!ChildExpressions[i].Equals(sequenceRegExp.ChildExpressions[i])) return false;
+            }
 
             return true;
         }

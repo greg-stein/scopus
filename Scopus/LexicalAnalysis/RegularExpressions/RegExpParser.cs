@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
 {
@@ -9,7 +10,7 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
             switch (notation)
             {
                 case RegExpNotation.POSIXNotation:
-                    return new POSIXRegExpParser();
+                    return new POSIXRegExpParser(Encoding.ASCII);
                 case RegExpNotation.MicrosoftNotation:
                     break;
             }

@@ -271,6 +271,28 @@ namespace ScopusUnitTests
             //var expectedRE = new SequenceRegExp()
         }
 
+        [Test]
+        public void CrossAutomataConstructionTest()
+        {
+            // (aa|bb|cc)*?ab
+            var repeatedRegExp = RegExp.Choice(RegExp.Literal("aa"), RegExp.Literal("bb"), RegExp.Literal("cc"));
+            var suffixRegExp = RegExp.Literal("ab");
+            var crossRegExp = RegExp.RepeatUntil(repeatedRegExp, suffixRegExp);
+
+            var crossAutomata = crossRegExp.AsNFA(true);
+            var simulatedState = crossAutomata.StartState.Simulate("aabbccbbaa");
+            Assert.False(simulatedState.IsAccepting);
+
+            simulatedState = crossAutomata.StartState.Simulate("ccaabbccaabbab");
+            Assert.That(simulatedState.IsAccepting);
+            simulatedState = crossAutomata.StartState.Simulate("ab");
+            Assert.That(simulatedState.IsAccepting);
+
+            simulatedState = crossAutomata.StartState.Simulate("ccaabbccaabba");
+            Assert.False(simulatedState.IsAccepting);
+            Assert.Throws<SimulationException>(() => crossAutomata.StartState.Simulate("ccaabbccaabbabab"));
+        }
+
         [TestCase('a', 'ש', "utf-16le")]
         [TestCase('a', 'ש', "utf-16be")]
         [TestCase('a', 'ש', "utf-8")]

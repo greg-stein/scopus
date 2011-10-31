@@ -5,9 +5,10 @@ namespace Scopus.Exceptions
     public class SyntaxErrorException : ParserException
     {
         public SyntaxErrorException(ParserContext context)
-            : base("Syntax error occured while parsing token stream")
+            : base(string.Format("Syntax error occured while parsing token stream. Token environment: {0}", 
+            context.CurrentToken.GetEnvironment()))
         {
-            Context = context;
+            Context = context; 
         }
 
         public ParserContext Context { get; private set; }

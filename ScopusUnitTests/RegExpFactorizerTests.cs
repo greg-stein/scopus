@@ -6,7 +6,7 @@ using Scopus.LexicalAnalysis.RegularExpressions;
 namespace ScopusUnitTests
 {
     [TestFixture]
-    public class RegExpOrganizerTests
+    public class RegExpFactorizerTests
     {
         [Test]
         public void RegExpHasLazyQuantifierTest()
@@ -23,7 +23,7 @@ namespace ScopusUnitTests
                     RegExp.Literal('c')),
                 RegExp.Literal('d'));
 
-            Assert.That(RegExpOrganizer.HasLazyQuantifiers(regExp));
+            Assert.That(RegExpFactorizer.HasLazyQuantifiers(regExp));
 
             // a((a|b)+|c)d
             regExp = RegExp.Sequence(
@@ -37,7 +37,7 @@ namespace ScopusUnitTests
                     RegExp.Literal('c')),
                 RegExp.Literal('d'));
 
-            Assert.IsFalse(RegExpOrganizer.HasLazyQuantifiers(regExp));
+            Assert.IsFalse(RegExpFactorizer.HasLazyQuantifiers(regExp));
         }
 
         [Test]
@@ -55,7 +55,7 @@ namespace ScopusUnitTests
                     RegExp.Literal('c')),
                 RegExp.Literal('d'));
 
-            var factorizedRE = RegExpOrganizer.Factorize(regExp);
+            var factorizedRE = RegExpFactorizer.Factorize(regExp);
 
             // a((a|b)+?|c)d = a((a|b)+?d | cd)
             var expectedRE = RegExp.Sequence(

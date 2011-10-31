@@ -292,6 +292,54 @@ namespace ScopusUnitTests
             Assert.That(dfa.StartState.Simulate(0, 1, 1, 1, 1, 1, 1).IsAccepting);
         }
 
+        // Tries to set two tokens such that one is subtype of another. According to the Scopus API 
+        // if same input maybe recognized as two different tokens, the token which was defined last
+        // is actually recognized.
+        // In this test we check a more common token: [a-z]+ versus abc
+        [Test]
+        public void TokenPrioritizationTest()
+        {
+            //      e       a-z       e  
+            // (S) ---> (1) ---> (2) ---> [T]
+            //   \        \___e__/        /
+            //    \___________e__________/
+            var state1 = new State("1");
+            var state2 = new State("2");
+
+            var nfa1 = new FiniteAutomata("nfa");
+            nfa1.StartState.AddTransitionTo(state1, InputChar.Epsilon());
+            for (char c = 'a'; c <= 'z'; c++ )
+            {
+                state1.AddTransitionTo(state2, InputChar.For((byte)c));
+            }
+                
+            state2.AddTransitionTo(nfa1.Terminator, InputChar.Epsilon());
+            state2.AddTransitionTo(state1, InputChar.Epsilon());
+            nfa1.StartState.AddTransitionTo(nfa1.Terminator, InputChar.Epsilon());
+            nfa1.Terminator.IsAccepting = true;
+            nfa1.Terminator.TokenClass = 1; // least priority, if defined early gets small token class
+
+            //      a        b        c  
+            // (S) ---> (3) ---> (4) ---> [T]
+            var state3 = new State("3");
+            var state4 = new State("4");
+
+            var nfa2 = new FiniteAutomata("nfa");
+            nfa1.StartState.AddTransitionTo(state3, InputChar.For((byte)'a'));
+            state3.AddTransitionTo(state4, InputChar.For((byte)'b'));
+            state4.AddTransitionTo(nfa1.Terminator, InputChar.For((byte)'c'));
+            nfa1.Terminator.IsAccepting = true;
+            nfa1.Terminator.TokenClass = 2; // most priority
+
+            var nfa = new FiniteAutomata("CommonAutomata");
+            nfa.StartState.AddTransitionTo(nfa1.StartState, InputChar.Epsilon());
+            nfa.StartState.AddTransitionTo(nfa2.StartState, InputChar.Epsilon());
+            var dfa = NFAToDFAConverter.Convert(nfa);
+
+            Assert.That(dfa.StartState.Simulate("abc").IsAccepting);
+            Assert.That(dfa.StartState.Simulate("abc").TokenClass, Is.EqualTo(2));
+        }
+
         [Test]
         public void FuckingTest()
         {

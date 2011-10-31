@@ -8,6 +8,28 @@ namespace ScopusUnitTests
     public class PerformanceComparisonTests
     {
         [Test]
+        public void RamiTest()
+        {
+            uint value = 0x01020304;
+            IterateThroughLong(ref value);
+            Console.WriteLine(String.Format("The value is: {0}", value));
+        }
+
+        private unsafe void IterateThroughLong(ref uint value)
+        {
+            fixed (uint* uintPtr = &value)
+            {
+                byte* bPtr = (byte*) uintPtr;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    Console.WriteLine(string.Format("value[{0}]={1}", i, *bPtr));
+                    bPtr++;
+                }
+            }
+        }
+
+        [Test]
         public void ConditionVsLookupTableTest()
         {
             var rnd = new Random();

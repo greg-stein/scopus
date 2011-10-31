@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ScopusUnitTests</RootNamespace>
     <AssemblyName>ScopusUnitTests</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -81,19 +82,13 @@
     <Compile Include="ParsingTableGenerationTests.cs" />
     <Compile Include="PerformanceComparisonTests.cs" />
     <Compile Include="ProofOfConceptTests.cs" />
-    <Compile Include="RegExpOrganizerTests.cs" />
+    <Compile Include="RegExpFactorizerTests.cs" />
     <Compile Include="RegExpSyntaxTreeTests.cs" />
     <Compile Include="RegExpTokenizerTests.cs" />
     <Compile Include="SimulateNfaAspect.cs" />
     <Compile Include="TableDrivenTransitionTests.cs" />
     <Compile Include="TokenizerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Scopus\Scopus.csproj">
-      <Project>{93892691-AB88-4FE8-9F33-ED5BC8FEFAD5}</Project>
-      <Name>Scopus</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -111,6 +106,12 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Scopus\Scopus.csproj">
+      <Project>{93892691-AB88-4FE8-9F33-ED5BC8FEFAD5}</Project>
+      <Name>Scopus</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

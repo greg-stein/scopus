@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Scopus.LexicalAnalysis.RegularExpressions
@@ -70,6 +71,31 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         }
 
         /// <summary>
+        /// Builds char class regular expression: [a-zA-Z0-9$#%^]
+        /// </summary>
+        /// <param name="chars">List of specific chars in char class</param>
+        /// <param name="ranges">List of ranges stored in tuples of &st; char, char &gt; </param>
+        /// <param name="encoding">Encoding of chars in a char class</param>
+        /// <returns></returns>
+        public static RegExp CharClass(List<char> chars, List<Tuple<char, char>> ranges, Encoding encoding)
+        {
+            var regExps = new RegExp[chars.Count + ranges.Count];
+            int regExpsCount = 0;
+
+            foreach (var c in chars)
+            {
+                regExps[regExpsCount++] = RegExp.Literal(c);
+            }
+
+            foreach (var range in ranges)
+            {
+                regExps[regExpsCount++] = RegExp.Range(range.Item1, range.Item2, encoding);
+            }
+
+            return new AlternationRegExp(regExps);
+        }
+
+        /// <summary>
         /// Builds star (repeatition - any number of occurences) regular expression: a* 
         /// </summary>
         /// <param name="regExp">Regular expression to repeat</param>
@@ -89,6 +115,17 @@ namespace Scopus.LexicalAnalysis.RegularExpressions
         public static RegExp AtLeastOneOf(RegExp regExp, Greediness greediness = Greediness.GreedyQuantification)
         {
             return new RepetitionAtLeastOneRegExp(regExp, greediness);
+        }
+
+        /// <summary>
+        /// Builds lazy repetition regular expression: (a)*?
+        /// </summary>
+        /// <param name="repeatedRegExp">Regular expression to repeat until first occurence of suffix</param>
+        /// <param name="suffixRegExp">suffix regexp, must be a the end of structure</param>
+        /// <returns></returns>
+        public static RegExp RepeatUntil(RegExp repeatedRegExp, RegExp suffixRegExp)
+        {
+            return new RepeatUntilRegExp(repeatedRegExp, suffixRegExp);
         }
 
         /// <summary>

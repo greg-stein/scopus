@@ -7,12 +7,21 @@ using ScopusUnitTests.Common;
 namespace ScopusAcceptanceTests
 {
     [TestFixture]
+    [Ignore] // TODO: Parsing of regular expressions is still TBD
     public class SimpleLexerTest
     {
+        private static object[] TestCases = {
+                                     new object[] {Encoding.ASCII},
+                                     new object[] {Encoding.BigEndianUnicode},
+                                     new object[] {Encoding.Unicode}, 
+                                     new object[] {Encoding.UTF32}, 
+                                     new object[] {Encoding.UTF8}
+                                 };
+
+        [TestCaseSource("TestCases")]
         [Test]
-        public void SimpleTest(string encodingStr)
+        public void SimpleTest(Encoding encoding)
         {
-            Encoding encoding = CommonTestRoutines.GetEncoding(encodingStr);
             string data = ""; //TODO
             byte[] dataBytes = encoding.GetBytes(data);
             var stream = new MemoryStream(dataBytes);

@@ -109,10 +109,10 @@ namespace Scopus.LexicalAnalysis
         }
 
         [Obsolete("This method will be replaced by one that parses regular expressions")]
-        public Terminal UseTerminal(RegExp regExp)
+        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction = null)
         {
             tokensNumber++;
-            return mTokenizer.UseTerminal(regExp);
+            return mTokenizer.UseTerminal(regExp, lexicalAction);
         }
 
         [Obsolete("This method will be replaced by one that parses regular expressions")]
@@ -122,36 +122,7 @@ namespace Scopus.LexicalAnalysis
             mTokenizer.IgnoreTerminal(regExp);
         }
 
-        public Terminal UseTerminal(string regexp)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(regexp);
-            return mTokenizer.UseTerminal(regExpObj);
-        }
-
-        public Terminal UseTerminal(string regexp, RegExpNotation notation)
-        {
-            tokensNumber++;
-            RegExpNotation = notation;
-            var regExpObj = mRegexpParser.Parse(regexp);
-            return mTokenizer.UseTerminal(regExpObj);
-        }
-
-        public Terminal UseTerminal(string regexp, Func<Token, bool> lexicalAction)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(regexp);
-            return mTokenizer.UseTerminal(regExpObj, lexicalAction);
-        }
-
-        public Terminal UseTerminal(string regexp, Greediness greediness)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(regexp);
-            return mTokenizer.UseTerminal(regExpObj, greediness);
-        }
-
-        public Terminal UseTerminal(string regexp, RegExpNotation notation, Func<Token, bool> lexicalAction)
+        public Terminal UseTerminal(string regexp, Func<Token, bool> lexicalAction = null, RegExpNotation notation = RegExpNotation.POSIXNotation)
         {
             tokensNumber++;
             RegExpNotation = notation;
@@ -159,57 +130,12 @@ namespace Scopus.LexicalAnalysis
             return mTokenizer.UseTerminal(regExpObj, lexicalAction);
         }
 
-        public Terminal UseTerminal(string regexp, RegExpNotation notation, Func<Token, bool> lexicalAction, Greediness greediness)
-        {
-            tokensNumber++;
-            RegExpNotation = notation;
-            var regExpObj = mRegexpParser.Parse(regexp);
-            return mTokenizer.UseTerminal(regExpObj, lexicalAction, greediness);
-        }
-
-        public void IgnoreTerminal(string ignoree)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.IgnoreTerminal(regExpObj);
-        }
-
-        public void IgnoreTerminal(string ignoree, RegExpNotation notation)
-        {
-            tokensNumber++;
-            RegExpNotation = notation;
-            var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.IgnoreTerminal(regExpObj);
-        }
-
-        public void IgnoreTerminal(string ignoree, Greediness greediness)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.IgnoreTerminal(regExpObj, greediness);
-        }
-
-        public void IgnoreTerminal(string ignoree, Func<Token, bool> lexicalAction)
-        {
-            tokensNumber++;
-            var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.IgnoreTerminal(regExpObj, lexicalAction);
-        }
-
-        public void IgnoreTerminal(string ignoree, RegExpNotation notation, Func<Token, bool> lexicalAction)
+        public void IgnoreTerminal(string ignoree, Func<Token, bool> lexicalAction = null, RegExpNotation notation = RegExpNotation.POSIXNotation)
         {
             tokensNumber++;
             RegExpNotation = notation;
             var regExpObj = mRegexpParser.Parse(ignoree);
             mTokenizer.IgnoreTerminal(regExpObj, lexicalAction);
-        }
-
-        public void IgnoreTerminal(string ignoree, RegExpNotation notation, Func<Token, bool> lexicalAction, Greediness greediness)
-        {
-            tokensNumber++;
-            RegExpNotation = notation;
-            var regExpObj = mRegexpParser.Parse(ignoree);
-            mTokenizer.IgnoreTerminal(regExpObj, lexicalAction, greediness);
         }
 
         public void SetDataSource(Stream stream)

@@ -28,82 +28,29 @@ namespace Scopus.LexicalAnalysis
             mClassIdProvider.GetNext(); // skip 0, cuz it reserved for Epsilon terminal
         }
 
-        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction)
+        //TODO: Func<Token, bool> => Predicate<Token>
+        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction = null)
         {
             FiniteAutomata tokenNfa = GetTokenNfa(regExp);
-            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
+            if (lexicalAction != null)
+            {
+                mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
+            }
 
             AddTokenToNfa(tokenNfa);
 
             var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
             return terminal;
-        }
-
-        public Terminal UseTerminal(RegExp regExp, Greediness greediness)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
-            tokenNfa.Terminator.Greediness = greediness;
-
-            AddTokenToNfa(tokenNfa);
-
-            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
-            return terminal;
-        }
-
-        public Terminal UseTerminal(RegExp regExp, Func<Token, bool> lexicalAction, Greediness greediness)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
-            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
-            tokenNfa.Terminator.Greediness = greediness;
-
-            AddTokenToNfa(tokenNfa);
-
-            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
-            return terminal;
-        }
-
-        public Terminal UseTerminal(RegExp regExp)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(regExp);
-
-            AddTokenToNfa(tokenNfa);
-
-            var terminal = new Terminal(regExp.ToString(), mClassIdProvider.GetCurrent());
-            return terminal;
-        }
-
-        public void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
-            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
-            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
-
-            AddTokenToNfa(tokenNfa);
-        }
-
-        public void IgnoreTerminal(RegExp ignoree, Greediness greediness)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
-            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
-            tokenNfa.Terminator.Greediness = greediness;
-
-            AddTokenToNfa(tokenNfa);
         }
 
         //TODO: Func<Token, bool> => Predicate<Token>
-        public void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction, Greediness greediness)
+        public void IgnoreTerminal(RegExp ignoree, Func<Token, bool> lexicalAction = null)
         {
             FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
-            mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
-            mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
-            tokenNfa.Terminator.Greediness = greediness;
-
-            AddTokenToNfa(tokenNfa);
-        }
-
-        public void IgnoreTerminal(RegExp ignoree)
-        {
-            FiniteAutomata tokenNfa = GetTokenNfa(ignoree);
+            if (lexicalAction != null)
+            {
+                mLexicalActions[tokenNfa.Terminator.TokenClass] = lexicalAction;
+            }
             mIgnoredTokens.Add(tokenNfa.Terminator.TokenClass);
 
             AddTokenToNfa(tokenNfa);

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Scopus</RootNamespace>
     <AssemblyName>Scopus</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
@@ -31,6 +31,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -85,7 +86,7 @@
     <Compile Include="LexicalAnalysis\Algorithms\CrossAutomata.cs" />
     <Compile Include="LexicalAnalysis\Algorithms\DFAMinimizer.cs" />
     <Compile Include="LexicalAnalysis\Algorithms\ITransitionFunction.cs" />
-    <Compile Include="LexicalAnalysis\Algorithms\RegExpOrganizer.cs" />
+    <Compile Include="LexicalAnalysis\Algorithms\RegExpFactorizer.cs" />
     <Compile Include="LexicalAnalysis\Algorithms\TableDrivenTransitionFunction.cs" />
     <Compile Include="LexicalAnalysis\Greediness.cs" />
     <Compile Include="LexicalAnalysis\ILexer.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="LexicalAnalysis\RegularExpressions\POSIXRegExpParser.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RegExpParser.cs" />
+    <Compile Include="LexicalAnalysis\RegularExpressions\RepeatUntilRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RepetitionAtLeastOneRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\RepetitionRegExp.cs" />
     <Compile Include="LexicalAnalysis\RegularExpressions\SequenceRegExp.cs" />

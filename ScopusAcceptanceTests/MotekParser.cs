@@ -12,7 +12,7 @@ using Scopus.SyntaxAnalysis;
 namespace ScopusAcceptanceTests
 {
     [TestFixture]
-    class MotekParser
+    public class MotekParser
     {
         private Lexer lexer;
         private Encoding encoding = Encoding.ASCII;
@@ -29,7 +29,7 @@ namespace ScopusAcceptanceTests
         private Terminal mMinusSign;
 
         [Test]
-        void Test()
+        public void Test()
         {
             lexer = ScopusFacade.GetLexer();
             SetUpLexer(); // This should be called before BuildGrammar, since grammar use terminals defined here

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Scopus.Auxiliary;
 
 namespace Scopus.LexicalAnalysis.Algorithms
@@ -82,9 +83,17 @@ namespace Scopus.LexicalAnalysis.Algorithms
                 {
                     if (state.IsAccepting)
                     {
-                        kvp.Key.IsAccepting = true;
-                        kvp.Key.TokenClass = state.TokenClass;
-                        break;
+                        if (kvp.Key.IsAccepting)
+                        {
+                            kvp.Key.TokenClass = Math.Max(kvp.Key.TokenClass, state.TokenClass);
+                        }
+                        else
+                        {
+                            kvp.Key.IsAccepting = true;
+                            kvp.Key.TokenClass = state.TokenClass;
+                        }
+                        // Go through all accepting states don't break on first
+                        //break;
                     }
                 }
             }

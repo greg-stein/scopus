@@ -86,6 +86,7 @@ namespace Scopus.SyntaxAnalysis
 
         #endregion
 
+        [System.Diagnostics.Conditional("DEBUG")]
         private void Trace(ActionTableEntry action, Token current)
         {
             string actionStr = string.Empty;
@@ -109,7 +110,7 @@ namespace Scopus.SyntaxAnalysis
             string stack = string.Empty;
             Array.ForEach(mStatesStack.ToArray(), i => stack = i + " " + stack);
 
-            Console.WriteLine("{0,10}|{1,5}|{2}", stack, current, actionStr);
+            Console.WriteLine("{0,10}|{1,10}|{2}", stack, current, actionStr);
         }
 
         private void DefaultErrorRecoveryRoutine(IParser parser, ParserContext context)
